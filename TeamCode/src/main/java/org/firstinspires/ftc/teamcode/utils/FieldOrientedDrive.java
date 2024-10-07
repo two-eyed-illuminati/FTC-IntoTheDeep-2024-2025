@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.utils;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -19,20 +19,23 @@ public class FieldOrientedDrive {
         imu = _imu;
     }
 
-    public void drive(double x, double y, double rotation){
+    public double[] drive(double x, double y, double rotation){
         double currRobotHeading = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        double targetFieldOrientedMoveHeading = Math.atan2(y, x);
+        double targetFieldOrientedMoveHeading = -Math.atan2(-x, y);
         double targetRobotOrientedMoveHeading = targetFieldOrientedMoveHeading - currRobotHeading;
 
-        double targetSpeed = Math.sqrt(x*x + y*y); // TODO: Consider making this sqrt(x^4 + y^4) for easier control at lower speeds
+        //Square the distance so that it is easier to control at low speeds
+        double targetSpeed = Math.pow(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)), 2);
         double targetRobotOrientedXMove = Math.sin(targetRobotOrientedMoveHeading) * targetSpeed;
         double targetRobotOrientedYMove = Math.cos(targetRobotOrientedMoveHeading) * targetSpeed;
 
-        double flSpeed = -targetRobotOrientedYMove - targetRobotOrientedXMove + rotation * rotSpeed;
-        double frSpeed = -targetRobotOrientedYMove + targetRobotOrientedXMove - rotation * rotSpeed;
-        double blSpeed = -targetRobotOrientedYMove + targetRobotOrientedXMove + rotation * rotSpeed;
-        double brSpeed = -targetRobotOrientedYMove - targetRobotOrientedXMove - rotation * rotSpeed;
+        //Square rotation so that it is easier to control at low rotation speeds
+        double correctedSquaredRotation = Math.pow(rotation, 2) * Math.signum(rotation);
+        double flSpeed = targetRobotOrientedYMove + targetRobotOrientedXMove + correctedSquaredRotation * rotSpeed;
+        double frSpeed = targetRobotOrientedYMove - targetRobotOrientedXMove - correctedSquaredRotation * rotSpeed;
+        double blSpeed = targetRobotOrientedYMove - targetRobotOrientedXMove + correctedSquaredRotation * rotSpeed;
+        double brSpeed = targetRobotOrientedYMove + targetRobotOrientedXMove - correctedSquaredRotation * rotSpeed;
 
         double maxSpeed = Math.max(Math.max(Math.abs(flSpeed), Math.abs(frSpeed)), Math.max(Math.abs(blSpeed), Math.abs(brSpeed)));
         if(maxSpeed > 1){
@@ -46,5 +49,10 @@ public class FieldOrientedDrive {
         fr.setPower(frSpeed);
         bl.setPower(blSpeed);
         br.setPower(brSpeed);
+
+        return new double[]{flSpeed, frSpeed, blSpeed, brSpeed,
+                targetFieldOrientedMoveHeading, targetRobotOrientedMoveHeading,
+                targetSpeed, targetRobotOrientedXMove, targetRobotOrientedYMove,
+                currRobotHeading};
     }
 }
