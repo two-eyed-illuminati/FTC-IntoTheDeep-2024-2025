@@ -1,22 +1,27 @@
 package org.firstinspires.ftc.teamcode.utils;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class FieldOrientedDrive {
-    DcMotor fl, fr, bl, br;
+    DcMotorEx fl, fr, bl, br;
     IMU imu;
 
     public double rotSpeed = 1.0;
 
-    public FieldOrientedDrive(DcMotor _fl, DcMotor _fr, DcMotor _bl, DcMotor _br, IMU _imu){
-        fl = _fl;
-        fr = _fr;
-        bl = _bl;
-        br = _br;
-        imu = _imu;
+    public FieldOrientedDrive(DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br, IMU imu){
+        this.fl = fl;
+        this.fr = fr;
+        this.bl = bl;
+        this.br = br;
+        this.imu = imu;
+    }
+
+    public void resetImu(){
+        imu.resetYaw();
     }
 
     public double[] drive(double x, double y, double rotation){
