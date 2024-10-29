@@ -33,5 +33,6 @@ public class TestBotTeleOp extends OpMode {
         telemetry.addData("br", motorPowers[3]);
         telemetry.addData("targetFieldOrientedMoveHeading", motorPowers[4]);
         telemetry.addData("currRobotHeading", motorPowers[9]);
+        telemetry.update();
     }
 }

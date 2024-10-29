@@ -12,6 +12,7 @@ public class Slide {
 
     public Slide(DcMotorEx slideMotor) {
         this.slideMotor = slideMotor;
+        this.slideMotor.setTargetPosition(0);
         this.slideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
