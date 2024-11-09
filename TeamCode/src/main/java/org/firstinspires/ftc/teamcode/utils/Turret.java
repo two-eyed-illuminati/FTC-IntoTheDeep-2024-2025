@@ -7,6 +7,7 @@ public class Turret {
     DcMotorEx turretMotor;
     final double PULSES_PER_REVOLUTION = 5281.1*4; // 4 is gear ratio
     final double MAX_REVOLUTIONS_PER_MIN = 30;
+    final double RESTING_ANGLE_RADIANS = -1; //Figure out later, should be angle between slide and spine
 
     public Turret(DcMotorEx turretMotor) {
         this.turretMotor = turretMotor;
@@ -15,7 +16,10 @@ public class Turret {
     }
 
     public void setAngleRadians(double angleRadians, double maxVelocity) {
-        // Angle = 0 is resting position, angle increases as turret rotates upwards
+        // Encoder = 0 is resting position, encoder increases as turret rotates upwards
+        assert(angleRadians >= RESTING_ANGLE_RADIANS);
+        angleRadians -= RESTING_ANGLE_RADIANS;
+
         double angleDegrees = angleRadians * 180 / Math.PI;
         double pulses = angleDegrees * PULSES_PER_REVOLUTION / 360;
 
@@ -28,9 +32,9 @@ public class Turret {
     }
 
     public double getAngleRadians() {
-        return turretMotor.getCurrentPosition() * 2 * Math.PI / PULSES_PER_REVOLUTION;
+        return turretMotor.getCurrentPosition() * 2 * Math.PI / PULSES_PER_REVOLUTION + RESTING_ANGLE_RADIANS;
     }
     public double getAngleDegrees() {
-        return turretMotor.getCurrentPosition() * 360 / PULSES_PER_REVOLUTION;
+        return turretMotor.getCurrentPosition() * 360 / PULSES_PER_REVOLUTION + RESTING_ANGLE_RADIANS * 180 / Math.PI;
     }
 }
