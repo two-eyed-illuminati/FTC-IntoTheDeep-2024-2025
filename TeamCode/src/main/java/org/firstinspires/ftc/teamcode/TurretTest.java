@@ -16,7 +16,9 @@ public class TurretTest extends OpMode {
     @Override
     public void init() {
         turretLeft = new Turret(hardwareMap.get(DcMotorEx.class, "turretLeft"));
-        turretRight = new Turret(hardwareMap.get(DcMotorEx.class, "turretRight"));
+        DcMotorEx turretRightMotor = hardwareMap.get(DcMotorEx.class, "turretRight");
+        turretRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        turretRight = new Turret(turretRightMotor);
     }
 
     @Override
@@ -28,6 +30,8 @@ public class TurretTest extends OpMode {
             moveTurretLeft = false;
         }
         Turret turret = moveTurretLeft ? turretLeft : turretRight;
-        turret.setAngleRadians(turret.getAngleRadians()+(-(-gamepad1.left_stick_y*10000)), Math.abs(gamepad1.left_stick_y*500));
+        turret.setAngleRadians(turret.getAngleRadians()+(-(-gamepad1.left_stick_y*10000)), 100000);
+        telemetry.addData("Turret Angle: ", turret.getAngleDegrees());
+        telemetry.update();
     }
 }

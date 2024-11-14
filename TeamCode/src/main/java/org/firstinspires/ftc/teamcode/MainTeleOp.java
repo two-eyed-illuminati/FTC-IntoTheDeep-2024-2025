@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.utils.Turret;
 
 @TeleOp
 public class MainTeleOp extends OpMode{
-    final double SLIDE_PIVOT_GROUND_HEIGHT = -1.0; //TODO figure out later
+    final double SLIDE_PIVOT_GROUND_HEIGHT = 13.0;
     final double CLAW_GRAB_HEIGHT = 5.0;
     boolean isGrabbing = false;
     FieldOrientedDrive fod;
@@ -26,20 +26,19 @@ public class MainTeleOp extends OpMode{
 
     @Override
     public void init() {
-        //TODO Remember to reverse motors if necessary
         fl = hardwareMap.get(DcMotorEx.class, "frontLeft"); fl.setDirection(DcMotorEx.Direction.REVERSE);
-        fr = hardwareMap.get(DcMotorEx.class, "frontRight"); fr.setDirection(DcMotorEx.Direction.REVERSE);
+        fr = hardwareMap.get(DcMotorEx.class, "frontRight");
         bl = hardwareMap.get(DcMotorEx.class, "backLeft"); bl.setDirection(DcMotorEx.Direction.REVERSE);
         br = hardwareMap.get(DcMotorEx.class, "backRight");
+
         IMU imu = hardwareMap.get(IMU.class, "imu");
-        //TODO Remember to Orient IMU correctly
         IMU.Parameters imuParameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
         imu.initialize(imuParameters);
         fod = new FieldOrientedDrive(fl, fr, bl, br, imu);
         fod.resetImu();
 
         turretLeft = new Turret(hardwareMap.get(DcMotorEx.class, "turretLeft"));
-        slideLeft = new Slide(hardwareMap.get(DcMotorEx.class, "slideLeft"));
+        slideLeft = new Slide(hardwareMap.get(DcMotorEx.class, "liftLeft"));
     }
 
     @Override
@@ -64,6 +63,9 @@ public class MainTeleOp extends OpMode{
 
             turretLeft.setAngleRadians(Math.atan(targetGroundDistance / (SLIDE_PIVOT_GROUND_HEIGHT - CLAW_GRAB_HEIGHT)), Math.abs(gamepad2.left_stick_y * 500));
             slideLeft.setLength(Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(SLIDE_PIVOT_GROUND_HEIGHT - CLAW_GRAB_HEIGHT, 2)), Math.abs(gamepad2.left_stick_y * 500));
+
+            telemetry.addData("Turret Angle: ", turretLeft.getAngleDegrees());
+            telemetry.addData("Slide Length: ", slideLeft.getLength());
 
             telemetry.update();
         }

@@ -14,9 +14,9 @@ public class SlideTest extends OpMode {
 
     @Override
     public void init() {
-        slideLeft = new Slide(hardwareMap.get(DcMotorEx.class, "slideLeft"));
-        slideRight = new Slide(hardwareMap.get(DcMotorEx.class, "slideRight"));
 
+        slideLeft = new Slide(hardwareMap.get(DcMotorEx.class, "liftLeft"));
+        slideRight = new Slide(hardwareMap.get(DcMotorEx.class, "liftRight"));
     }
 
     @Override
@@ -28,8 +28,10 @@ public class SlideTest extends OpMode {
             moveSlideLeft = false;
         }
         Slide slide = moveSlideLeft ? slideLeft : slideRight;
-        slide.setLength(slide.getLength()+(-gamepad1.left_stick_y*10000), Math.abs(gamepad1.left_stick_y*100));
-        telemetry.addData("Slide Length: ", slide.getLength());
+        double targetDistance = slideRight.getLength() + (-gamepad1.left_stick_y*10000);
+        slideRight.setLength(targetDistance, 10000);
+        telemetry.addData("Slide Length: ", slideRight.getLength());
+        telemetry.addData("Target Distance: ", targetDistance);
         telemetry.update();
     }
 }

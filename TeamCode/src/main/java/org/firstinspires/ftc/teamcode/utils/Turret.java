@@ -4,10 +4,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 public class Turret {
-    DcMotorEx turretMotor;
+    public DcMotorEx turretMotor;
     final double PULSES_PER_REVOLUTION = 5281.1*4; // 4 is gear ratio
     final double MAX_REVOLUTIONS_PER_MIN = 30;
-    final double RESTING_ANGLE_RADIANS = -1; //Figure out later, should be angle between slide and spine
+    final double RESTING_ANGLE_RADIANS = Math.PI/6; // TODO: Probably Wrong
 
     public Turret(DcMotorEx turretMotor) {
         this.turretMotor = turretMotor;
@@ -17,13 +17,11 @@ public class Turret {
 
     public void setAngleRadians(double angleRadians, double maxVelocity) {
         // Encoder = 0 is resting position, encoder increases as turret rotates upwards
-        assert(angleRadians >= RESTING_ANGLE_RADIANS);
         angleRadians -= RESTING_ANGLE_RADIANS;
 
         double angleDegrees = angleRadians * 180 / Math.PI;
         double pulses = angleDegrees * PULSES_PER_REVOLUTION / 360;
 
-        assert(maxVelocity < MAX_REVOLUTIONS_PER_MIN * PULSES_PER_REVOLUTION / 60);
         turretMotor.setVelocity(maxVelocity);
         turretMotor.setTargetPosition((int) pulses);
     }
