@@ -9,21 +9,23 @@ public class Slide {
     final double MAX_REVOLUTIONS_PER_MIN = 30;
     final double INCHES_EXTENDED_PER_REVOLUTION = 46.0839; //Encoder:6 Length 9.5, Encoder:2212 Length:28.75
     final double COLLAPSED_LENGTH = 10.0; // Length from pivot point to claw
-    final double MAX_PULSES = 2200.0; // Maximum encoder value for fully extended slide
+    final double MAX_PULSES = 2400.0; // Maximum encoder value for fully extended slide
 
     public Slide(DcMotorEx slideMotor) {
         this.slideMotor = slideMotor;
+        this.slideMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.slideMotor.setTargetPosition(0);
         this.slideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        this.slideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void setLength(double lengthInches, double maxVelocity) {
         double pulses = (PULSES_PER_REVOLUTION / INCHES_EXTENDED_PER_REVOLUTION) * (lengthInches - COLLAPSED_LENGTH);
         pulses = Math.min(pulses, MAX_PULSES);
         pulses = Math.max(pulses, 50);
-        
-        slideMotor.setVelocity(maxVelocity);
+
         slideMotor.setTargetPosition((int) pulses);
+        slideMotor.setVelocity(maxVelocity);
     }
 
     public double getLength() {

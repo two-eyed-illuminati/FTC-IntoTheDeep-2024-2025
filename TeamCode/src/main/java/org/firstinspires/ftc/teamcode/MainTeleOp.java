@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.utils.Turret;
 @TeleOp
 public class MainTeleOp extends OpMode{
     final double SLIDE_PIVOT_GROUND_HEIGHT = 13.0;
-    final double CLAW_GRAB_HEIGHT = 5.0;
+    final double CLAW_GRAB_HEIGHT = 6.5;
     boolean isGrabbing = false;
     FieldOrientedDrive fod;
     Turret turretLeft;
@@ -23,6 +23,10 @@ public class MainTeleOp extends OpMode{
     DcMotorEx fr;
     DcMotorEx bl;
     DcMotorEx br;
+
+    double targetGroundDistance = 12.0;
+    double targetSlideLength = 10;
+    double targetTurretAngle = Math.PI/4;
 
     @Override
     public void init() {
@@ -53,21 +57,36 @@ public class MainTeleOp extends OpMode{
 
         if(gamepad2.a) {
             isGrabbing = true;
+            targetGroundDistance = 8.0;
         }
         else if(gamepad2.b) {
             isGrabbing = false;
         }
 
         if(isGrabbing) {
-            double targetGroundDistance = Math.tan(turretLeft.getAngleRadians()) * (SLIDE_PIVOT_GROUND_HEIGHT - CLAW_GRAB_HEIGHT) - gamepad2.left_stick_y;
+            targetGroundDistance -= gamepad2.left_stick_y*0.4;
+            targetGroundDistance = Math.max(targetGroundDistance, 6);
+            targetGroundDistance = Math.min(targetGroundDistance, 30);
 
-            turretLeft.setAngleRadians(Math.atan(targetGroundDistance / (SLIDE_PIVOT_GROUND_HEIGHT - CLAW_GRAB_HEIGHT)), Math.abs(gamepad2.left_stick_y * 500));
-            slideLeft.setLength(Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(SLIDE_PIVOT_GROUND_HEIGHT - CLAW_GRAB_HEIGHT, 2)), Math.abs(gamepad2.left_stick_y * 500));
+            turretLeft.setAngleRadians(Math.atan(targetGroundDistance / (SLIDE_PIVOT_GROUND_HEIGHT - CLAW_GRAB_HEIGHT)), Math.abs(gamepad2.left_stick_y * 50000000));
+            slideLeft.setLength(Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(SLIDE_PIVOT_GROUND_HEIGHT - CLAW_GRAB_HEIGHT, 2)), Math.abs(gamepad2.left_stick_y * 5000000));
+
+            targetTurretAngle = Math.atan(targetGroundDistance / (SLIDE_PIVOT_GROUND_HEIGHT - CLAW_GRAB_HEIGHT));
+            targetSlideLength = Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(SLIDE_PIVOT_GROUND_HEIGHT - CLAW_GRAB_HEIGHT, 2));
 
             telemetry.addData("Turret Angle: ", turretLeft.getAngleDegrees());
             telemetry.addData("Slide Length: ", slideLeft.getLength());
+            telemetry.addData("Target Ground Distance: ", targetGroundDistance);
 
             telemetry.update();
+        }
+        else {
+            targetTurretAngle -= gamepad2.left_stick_y * gamepad2.left_stick_y * 0.25 * Math.signum(gamepad2.left_stick_y);
+            targetTurretAngle = Math.min(turretLeft.getAngleRadians() + Math.PI/24, targetTurretAngle);
+            targetTurretAngle = Math.max(turretLeft.getAngleRadians() - Math.PI/24, targetTurretAngle);
+            targetSlideLength -= gamepad2.right_stick_y * gamepad2.right_stick_y * 1 * Math.signum(gamepad2.right_stick_y);
+            turretLeft.setAngleRadians(targetTurretAngle, 100000);
+            slideLeft.setLength(targetSlideLength, 1000000);
         }
     }
 }

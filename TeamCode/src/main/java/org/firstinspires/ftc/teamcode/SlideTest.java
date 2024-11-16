@@ -29,9 +29,15 @@ public class SlideTest extends OpMode {
         }
         Slide slide = moveSlideLeft ? slideLeft : slideRight;
         double targetDistance = slideRight.getLength() + (-gamepad1.left_stick_y*10000);
-        slideRight.setLength(targetDistance, 10000);
+        double pulses = (5281.1 / 46.0) * (targetDistance - 10.0);
+        pulses = Math.min(pulses, 2200);
+        pulses = Math.max(pulses, 50);
+        slideRight.setLength(targetDistance, 1000000);
+        slideRight.slideMotor.setVelocity(1000000);
         telemetry.addData("Slide Length: ", slideRight.getLength());
         telemetry.addData("Target Distance: ", targetDistance);
+        telemetry.addData("Pulses: ", pulses);
+        telemetry.addData("Slide Encoder: ", slideRight.getEncoder());
         telemetry.update();
     }
 }

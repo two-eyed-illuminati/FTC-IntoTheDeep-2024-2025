@@ -7,12 +7,15 @@ public class Turret {
     public DcMotorEx turretMotor;
     final double PULSES_PER_REVOLUTION = 5281.1*4; // 4 is gear ratio
     final double MAX_REVOLUTIONS_PER_MIN = 30;
-    final double RESTING_ANGLE_RADIANS = Math.PI/6; // TODO: Probably Wrong
+    final double RESTING_ANGLE_RADIANS = Math.PI/4; // TODO: Probably Wrong
+    final double MAX_PULSES = 7900;
 
     public Turret(DcMotorEx turretMotor) {
         this.turretMotor = turretMotor;
+        this.turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.turretMotor.setTargetPosition(0);
         this.turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        this.turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void setAngleRadians(double angleRadians, double maxVelocity) {
@@ -21,6 +24,8 @@ public class Turret {
 
         double angleDegrees = angleRadians * 180 / Math.PI;
         double pulses = angleDegrees * PULSES_PER_REVOLUTION / 360;
+        pulses = Math.max(20, pulses);
+        pulses = Math.min(MAX_PULSES, pulses);
 
         turretMotor.setVelocity(maxVelocity);
         turretMotor.setTargetPosition((int) pulses);
