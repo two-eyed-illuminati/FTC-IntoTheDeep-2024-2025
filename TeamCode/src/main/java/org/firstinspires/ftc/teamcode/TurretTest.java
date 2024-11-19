@@ -11,27 +11,22 @@ import org.firstinspires.ftc.teamcode.utils.Turret;
 public class TurretTest extends OpMode {
     Turret turretLeft;
     Turret turretRight;
+    DcMotorEx turretLeftMotor;
+    DcMotorEx turretRightMotor;
     boolean moveTurretLeft = true;
 
     @Override
     public void init() {
-        turretLeft = new Turret(hardwareMap.get(DcMotorEx.class, "turretLeft"));
-        DcMotorEx turretRightMotor = hardwareMap.get(DcMotorEx.class, "turretRight");
+//        turretLeft = new Turret(hardwareMap.get(DcMotorEx.class, "turretLeft"));
+        turretLeftMotor = hardwareMap.get(DcMotorEx.class, "turretLeft");
+        turretRightMotor = hardwareMap.get(DcMotorEx.class, "turretRight");
         turretRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
-        turretRight = new Turret(turretRightMotor);
+//        turretRight = new Turret(turretRightMotor);
     }
 
     @Override
     public void loop() {
-        if(gamepad1.a) {
-            moveTurretLeft = true;
-        }
-        else if(gamepad1.b) {
-            moveTurretLeft = false;
-        }
-        Turret turret = moveTurretLeft ? turretLeft : turretRight;
-        turret.setAngleRadians(turret.getAngleRadians()+(-(-gamepad1.left_stick_y*10000)), 100000);
-        telemetry.addData("Turret Angle: ", turret.getAngleDegrees());
-        telemetry.update();
+        turretLeftMotor.setPower(gamepad1.left_stick_y);
+        turretRightMotor.setPower(gamepad1.right_stick_y);
     }
 }
