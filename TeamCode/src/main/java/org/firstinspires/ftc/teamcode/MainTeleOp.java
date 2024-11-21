@@ -15,9 +15,10 @@ import org.firstinspires.ftc.teamcode.utils.Turret;
 @TeleOp
 public class MainTeleOp extends OpMode{
     final double SLIDE_PIVOT_GROUND_HEIGHT = 13.0;
-    final double CLAW_GRAB_HEIGHT = 6.5;
+    final double CLAW_GRAB_HEIGHT = 4.25;
     boolean isGrabbing = false;
     boolean isOuttake = false;
+    boolean isPreset = false;
     FieldOrientedDrive fod;
     Turret turretLeft;
     Slide slideLeft;
@@ -28,9 +29,10 @@ public class MainTeleOp extends OpMode{
     Servo fingers;
     Servo hand;
 
-    double targetGroundDistance = 12.0;
+    double targetGroundDistance = 8.0;
     double targetSlideLength = 10;
-    double targetTurretAngle = Math.PI/4;
+    double targetTurretAngle = Math.PI*45/180;
+    double targetSlideVelocity = 0;
 
     @Override
     public void init() {
@@ -72,12 +74,16 @@ public class MainTeleOp extends OpMode{
         else if(gamepad2.a){
             isGrabbing = false;
             targetSlideLength = 10;
-            targetTurretAngle = Math.PI/4;
+            targetSlideVelocity = 1600;
+            targetTurretAngle = Math.PI*40/180;
+            isPreset = true;
         }
         else if(gamepad2.y){
             isGrabbing = false;
             targetSlideLength = 30;
-            targetTurretAngle = 3*Math.PI/4;
+            targetSlideVelocity = 1600;
+            targetTurretAngle = Math.PI*160/180;
+            isPreset = true;
         }
 
         if(isGrabbing) {
@@ -91,7 +97,7 @@ public class MainTeleOp extends OpMode{
             targetTurretAngle = Math.atan(targetGroundDistance / (SLIDE_PIVOT_GROUND_HEIGHT - CLAW_GRAB_HEIGHT));
             targetSlideLength = Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(SLIDE_PIVOT_GROUND_HEIGHT - CLAW_GRAB_HEIGHT, 2));
 
-            hand.setPosition((Math.PI/2+targetTurretAngle)*0.93/Math.PI);
+            hand.setPosition((Math.PI*100/180+targetTurretAngle)*0.93/Math.PI);
 
             telemetry.addData("Turret Angle: ", turretLeft.getAngleDegrees());
             telemetry.addData("Slide Length: ", slideLeft.getLength());
@@ -101,12 +107,18 @@ public class MainTeleOp extends OpMode{
         }
         else {
             // TODO: Try switching motor modes here to reduce lag
-            targetTurretAngle -= gamepad2.left_stick_y * gamepad2.left_stick_y * 0.25 * Math.signum(gamepad2.left_stick_y);
-            targetTurretAngle = Math.min(turretLeft.getAngleRadians() + Math.PI/24, targetTurretAngle);
-            targetTurretAngle = Math.max(turretLeft.getAngleRadians() - Math.PI/24, targetTurretAngle);
+            if(gamepad2.left_stick_y != 0) {
+                isPreset = false;
+                targetTurretAngle -= gamepad2.left_stick_y * gamepad2.left_stick_y * 0.25 * Math.signum(gamepad2.left_stick_y);
+                targetTurretAngle = Math.min(turretLeft.getAngleRadians() + Math.PI / 24, targetTurretAngle);
+                targetTurretAngle = Math.max(turretLeft.getAngleRadians() - Math.PI / 24, targetTurretAngle);
+            }
 
-            targetSlideLength = 10000 * -gamepad2.right_stick_y;
-            double targetSlideVelocity = gamepad2.right_stick_y * gamepad2.right_stick_y * 1600;
+            if(gamepad2.right_stick_y != 0 || !isPreset) {
+                isPreset = false;
+                targetSlideLength = 10000 * -gamepad2.right_stick_y;
+                targetSlideVelocity = gamepad2.right_stick_y * gamepad2.right_stick_y * 1600;
+            }
 
             turretLeft.setAngleRadians(targetTurretAngle, 100000);
             slideLeft.setLength(targetSlideLength, targetSlideVelocity);
@@ -118,6 +130,7 @@ public class MainTeleOp extends OpMode{
         else if(gamepad2.dpad_right){
             fingers.setPosition(0.6);
         }
+        telemetry.addData("Fingers Position: ", fingers.getPosition());
 
         if((gamepad2.dpad_down || isOuttake) && !isGrabbing){
             isOuttake = true;
@@ -127,5 +140,6 @@ public class MainTeleOp extends OpMode{
             isOuttake = false;
             hand.setPosition(0.0);
         }
+        telemetry.addData("Hand Position: ", hand.getPosition());
     }
 }
