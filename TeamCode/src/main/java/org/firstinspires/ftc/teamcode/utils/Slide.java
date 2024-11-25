@@ -9,7 +9,7 @@ public class Slide {
     final double MAX_REVOLUTIONS_PER_MIN = 30;
     final double INCHES_EXTENDED_PER_REVOLUTION = 46.0839; //Encoder:6 Length 9.5, Encoder:2212 Length:28.75
     final double COLLAPSED_LENGTH = 10.0; // Length from pivot point to claw
-    final double MAX_PULSES = 2300.0; // Maximum encoder value for fully extended slide
+    final double MAX_PULSES = 2350.0; // Maximum encoder value for fully extended slide
 
     public Slide(DcMotorEx slideMotor) {
         this.slideMotor = slideMotor;

@@ -6,11 +6,11 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.teamcode.utils.FieldOrientedDrive;
+import org.firstinspires.ftc.teamcode.utils.Drive;
 
 @TeleOp
 public class TestBotTeleOp extends OpMode {
-    FieldOrientedDrive fod;
+    Drive fod;
 
     @Override
     public void init() {
@@ -20,13 +20,13 @@ public class TestBotTeleOp extends OpMode {
         DcMotorEx br = hardwareMap.get(DcMotorEx.class,  "backRight");
         IMU.Parameters imuParameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
         IMU imu = hardwareMap.get(IMU.class, "imu"); imu.initialize(imuParameters);
-        fod = new FieldOrientedDrive(fl, fr, bl, br, hardwareMap.get(IMU.class, "imu"));
+        fod = new Drive(fl, fr, bl, br, hardwareMap.get(IMU.class, "imu"));
         fod.resetImu();
     }
 
     @Override
     public void loop() {
-        double[] motorPowers = fod.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x);
+        double[] motorPowers = fod.driveFieldCentric(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x);
         telemetry.addData("fl", motorPowers[0]);
         telemetry.addData("fr", motorPowers[1]);
         telemetry.addData("bl", motorPowers[2]);

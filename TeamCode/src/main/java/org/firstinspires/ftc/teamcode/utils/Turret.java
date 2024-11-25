@@ -7,7 +7,7 @@ public class Turret {
     public DcMotorEx turretMotor;
     final double PULSES_PER_REVOLUTION = 5281.1*4; // 4 is gear ratio
     final double MAX_REVOLUTIONS_PER_MIN = 30;
-    final double RESTING_ANGLE_RADIANS = Math.PI*40.0/180.0; // TODO: Probably Wrong
+    final double RESTING_ANGLE_RADIANS = Math.PI*45.0/180.0; // TODO: Probably Wrong
     final double MAX_PULSES = 7900;
 
     public Turret(DcMotorEx turretMotor) {

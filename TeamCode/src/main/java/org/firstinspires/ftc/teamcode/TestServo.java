@@ -31,7 +31,9 @@ public class TestServo extends OpMode {
             servo = wristServo;
         }
         position += gamepad1.left_stick_y * 0.01;
+        position = Math.min(1.0, Math.max(0.0, position));
         servo.setPosition(position);
+        telemetry.addLine("A: hand, B: fingers, X: wrist");
         telemetry.addData("servo position", servo.getPosition());
         telemetry.addData("position", position);
         telemetry.update();
