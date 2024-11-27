@@ -17,6 +17,8 @@ public class MainTeleOp extends OpMode{
     DcMotorEx fl, fr, bl, br;
     Servo fingers, hand, wrist;
     final double SLIDE_PIVOT_GROUND_HEIGHT = 13.0;
+    final double MAX_GROUND_DISTANCE = 30;
+    final double MIN_GROUND_HEIGHT = 0;
     final double CLAW_GRAB_HEIGHT = 8.25;
     final double FINGER_CLOSE_POS = 0.5;
     final double FINGER_OPEN_POS = 0.0;
@@ -129,17 +131,38 @@ public class MainTeleOp extends OpMode{
         }
 //        else {
             // TODO: Try switching motor modes here to reduce lag
-            if(gamepad2.left_stick_y != 0) {
-                isPreset = false;
-                targetTurretAngle -= gamepad2.left_stick_y * gamepad2.left_stick_y * 0.25 * Math.signum(gamepad2.left_stick_y);
-                targetTurretAngle = Math.min(turretLeft.getAngleRadians() + Math.PI / 24, targetTurretAngle);
-                targetTurretAngle = Math.max(turretLeft.getAngleRadians() - Math.PI / 24, targetTurretAngle);
-            }
 
             if(gamepad2.right_stick_y != 0 || !isPreset) {
                 isPreset = false;
                 targetSlideLength = 10000 * -gamepad2.right_stick_y;
                 targetSlideVelocity = gamepad2.right_stick_y * gamepad2.right_stick_y * 1600;
+                double currGroundDistance = Math.sin(turretLeft.getAngleRadians()) * slideLeft.getLength();
+                if(currGroundDistance > MAX_GROUND_DISTANCE){
+                    targetSlideLength = Math.min(MAX_GROUND_DISTANCE / Math.sin(turretLeft.getAngleRadians()), targetSlideLength);
+                    targetSlideVelocity = 1600;
+                }
+                double currGroundHeight = SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turretLeft.getAngleRadians()) * slideLeft.getLength();
+                if(currGroundHeight < MIN_GROUND_HEIGHT){
+                    targetSlideLength = Math.min((SLIDE_PIVOT_GROUND_HEIGHT - MIN_GROUND_HEIGHT) / Math.cos(turretLeft.getAngleRadians()), targetSlideLength);
+                    targetSlideVelocity = 1600;
+                }
+            }
+
+            if(gamepad2.left_stick_y != 0) {
+                isPreset = false;
+                targetTurretAngle -= gamepad2.left_stick_y * gamepad2.left_stick_y * 0.25 * Math.signum(gamepad2.left_stick_y);
+                targetTurretAngle = Math.min(turretLeft.getAngleRadians() + Math.PI / 24, targetTurretAngle);
+                targetTurretAngle = Math.max(turretLeft.getAngleRadians() - Math.PI / 24, targetTurretAngle);
+                double futureGroundDistance = Math.sin(targetTurretAngle) * slideLeft.getLength();
+                if(futureGroundDistance > MAX_GROUND_DISTANCE){
+                    targetSlideLength = MAX_GROUND_DISTANCE / Math.sin(targetTurretAngle);
+                    targetSlideVelocity = 1600;
+                }
+                double futureGroundHeight = SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(targetTurretAngle) * slideLeft.getLength();
+                if(futureGroundHeight < MIN_GROUND_HEIGHT){
+                    targetSlideLength = (SLIDE_PIVOT_GROUND_HEIGHT - MIN_GROUND_HEIGHT) / Math.cos(targetTurretAngle);
+                    targetSlideVelocity = 1600;
+                }
             }
 
             turretLeft.setAngleRadians(targetTurretAngle, 100000);
