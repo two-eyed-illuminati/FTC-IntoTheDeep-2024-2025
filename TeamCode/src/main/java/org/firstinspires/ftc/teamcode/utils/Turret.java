@@ -6,8 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 public class Turret {
     public DcMotorEx turretMotor;
     final double PULSES_PER_REVOLUTION = 5281.1*4; // 4 is gear ratio
-    final double MAX_REVOLUTIONS_PER_MIN = 30;
-    final double RESTING_ANGLE_RADIANS = Math.PI*45.0/180.0; // TODO: Probably Wrong
+    final double RESTING_ANGLE_RADIANS = Math.PI*45.0/180.0;
     final double MAX_PULSES = 7900;
 
     public Turret(DcMotorEx turretMotor) {
@@ -30,8 +29,14 @@ public class Turret {
         turretMotor.setVelocity(maxVelocity);
         turretMotor.setTargetPosition((int) pulses);
     }
+    public void setAngleRadians(double angleRadians){
+        setAngleRadians(angleRadians, 100000);
+    }
     public void setAngleDegrees(double angleDegrees, double maxVelocity) {
         setAngleRadians(angleDegrees * Math.PI / 180, maxVelocity);
+    }
+    public void setAngleDegrees(double angleDegrees) {
+        setAngleDegrees(angleDegrees, 100000);
     }
 
     public double getAngleRadians() {
