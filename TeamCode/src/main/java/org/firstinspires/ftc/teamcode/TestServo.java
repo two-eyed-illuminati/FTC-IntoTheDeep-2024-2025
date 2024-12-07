@@ -11,31 +11,36 @@ public class TestServo extends OpMode {
     Servo wristServo;
     Servo servo;
     double position = 0.0;
+    boolean started = false;
     @Override
     public void init() {
         handServo = hardwareMap.get(Servo.class, "hand");
         fingerServo = hardwareMap.get(Servo.class, "fingers");
         wristServo = hardwareMap.get(Servo.class, "wrist");
-        servo = handServo;
     }
 
     @Override
     public void loop() {
         if(gamepad1.a) {
             servo = handServo;
+            started = true;
         }
         if(gamepad1.b) {
             servo = fingerServo;
+            started = true;
         }
         if(gamepad1.x) {
             servo = wristServo;
+            started = true;
         }
-        position += gamepad1.left_stick_y * 0.01;
+        position -= gamepad1.left_stick_y * 0.003;
         position = Math.min(1.0, Math.max(0.0, position));
-        servo.setPosition(position);
         telemetry.addLine("A: hand, B: fingers, X: wrist");
-        telemetry.addData("servo position", servo.getPosition());
-        telemetry.addData("position", position);
+        if(started){
+            servo.setPosition(position);
+            telemetry.addData("servo position", servo.getPosition());
+            telemetry.addData("position", position);
+        }
         telemetry.update();
     }
 }

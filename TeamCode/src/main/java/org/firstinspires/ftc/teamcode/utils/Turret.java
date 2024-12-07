@@ -26,6 +26,7 @@ public class Turret {
         pulses = Math.max(20, pulses);
         pulses = Math.min(MAX_PULSES, pulses);
 
+        maxVelocity = Math.min(maxVelocity, 5281.1*30.0/60.0);
         turretMotor.setVelocity(maxVelocity);
         turretMotor.setTargetPosition((int) pulses);
     }

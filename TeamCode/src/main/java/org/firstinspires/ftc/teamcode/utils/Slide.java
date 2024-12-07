@@ -23,6 +23,7 @@ public class Slide {
         pulses = Math.max(pulses, 50);
 
         slideMotor.setTargetPosition((int) pulses);
+        maxVelocity = Math.min(maxVelocity, 537.7*312.0/60.0);
         slideMotor.setVelocity(maxVelocity);
     }
     public void setLength(double lengthInches){

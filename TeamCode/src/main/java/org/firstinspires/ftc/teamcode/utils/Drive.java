@@ -6,8 +6,9 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class Drive {
-    DcMotorEx fl, fr, bl, br;
-    IMU imu;
+    public DcMotorEx fl, fr, bl, br;
+    public IMU imu;
+    ControlsToValues ctv = new ControlsToValues();
 
     public double rotSpeed = 1.0;
 
@@ -23,27 +24,14 @@ public class Drive {
         imu.resetYaw();
     }
 
-    public double targetSpeedFromJoysticks(double x, double y){
-        //TODO: test new formula
-        double distance = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-        double f = 1/(1 + Math.pow(Math.E, -8.5 * Math.abs(distance) + 3));
-        //Normalize F so that normalized_f(0) = 0 and normalized_f(1) = 1
-        double normalized_f = (1.0/0.946514325331)*(f-0.0474258731776);
-        return normalized_f;
-    }
-    public double targetSpeedFromJoysticks(double x){
-        return targetSpeedFromJoysticks(x, 0);
-    }
-
-    public double[] driveNormal(double x, double y, double rotation){
-        //Square the distance so that it is easier to control at low speeds
-        double targetSpeed = targetSpeedFromJoysticks(x, y);
+    public double[] driveNormal(double x, double y, double rotation, ControlsToValues ctv){
+        double targetSpeed = ctv.targetSpeedFromJoysticks(x, y);
 
         double targetHeading = -Math.atan2(-x, y);
         double targetRobotOrientedXMove = Math.sin(targetHeading) * targetSpeed;
         double targetRobotOrientedYMove = Math.cos(targetHeading) * targetSpeed;
 
-        double targetRotSpeed = targetSpeedFromJoysticks(rotation);
+        double targetRotSpeed = ctv.targetSpeedFromJoysticks(rotation);
 
         double flSpeed = targetRobotOrientedYMove + targetRobotOrientedXMove + targetRotSpeed * rotSpeed;
         double frSpeed = targetRobotOrientedYMove - targetRobotOrientedXMove - targetRotSpeed * rotSpeed;
@@ -67,10 +55,14 @@ public class Drive {
                 targetSpeed, targetRobotOrientedXMove, targetRobotOrientedYMove};
     }
 
-    public double[] driveFieldCentric(double x, double y, double rotation){
+    public double[] driveNormal(double x, double y, double rotation){
+        return driveNormal(x, y, rotation, ctv);
+    }
+
+    public double[] driveFieldCentric(double x, double y, double rotation, ControlsToValues ctv){
         double currRobotHeading = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        double targetSpeed = targetSpeedFromJoysticks(x, y);
+        double targetSpeed = ctv.targetSpeedFromJoysticks(x, y);
 
         double targetFieldOrientedMoveHeading = -Math.atan2(-x, y);
         double targetRobotOrientedMoveHeading = targetFieldOrientedMoveHeading - currRobotHeading;
@@ -78,7 +70,7 @@ public class Drive {
         double targetRobotOrientedXMove = Math.sin(targetRobotOrientedMoveHeading) * targetSpeed;
         double targetRobotOrientedYMove = Math.cos(targetRobotOrientedMoveHeading) * targetSpeed;
 
-        double targetRotSpeed = targetSpeedFromJoysticks(rotation);
+        double targetRotSpeed = ctv.targetSpeedFromJoysticks(rotation);
 
         double flSpeed = targetRobotOrientedYMove + targetRobotOrientedXMove + targetRotSpeed * rotSpeed;
         double frSpeed = targetRobotOrientedYMove - targetRobotOrientedXMove - targetRotSpeed * rotSpeed;
@@ -102,5 +94,9 @@ public class Drive {
                 targetFieldOrientedMoveHeading, targetRobotOrientedMoveHeading,
                 targetSpeed, targetRobotOrientedXMove, targetRobotOrientedYMove,
                 currRobotHeading};
+    }
+
+    public double[] driveFieldCentric(double x, double y, double rotation){
+        return driveFieldCentric(x, y, rotation, ctv);
     }
 }
