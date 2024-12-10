@@ -78,8 +78,6 @@ public class MainTeleOp extends OpMode{
         for (LynxModule module : allHubs) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
-
-        timer.reset();
     }
 
     @Override
