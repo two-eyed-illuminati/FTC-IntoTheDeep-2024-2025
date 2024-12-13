@@ -14,7 +14,7 @@ public class MoveForwardTeleOp extends OpMode{
     @Override
     public void init() {
         fl = hardwareMap.get(DcMotorEx.class, "frontLeft"); fl.setDirection(DcMotorEx.Direction.REVERSE);
-        fr = hardwareMap.get(DcMotorEx.class, "frontRight"); fr.setDirection(DcMotorEx.Direction.REVERSE);
+        fr = hardwareMap.get(DcMotorEx.class, "frontRight");
         bl = hardwareMap.get(DcMotorEx.class, "backLeft"); bl.setDirection(DcMotorEx.Direction.REVERSE);
         br = hardwareMap.get(DcMotorEx.class, "backRight");
     }
