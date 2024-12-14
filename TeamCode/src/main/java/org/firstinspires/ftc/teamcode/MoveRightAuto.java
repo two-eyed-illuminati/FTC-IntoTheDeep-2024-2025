@@ -19,10 +19,16 @@ public class MoveRightAuto extends LinearOpMode {
 
         waitForStart();
 
-        fl.setPower(-0.5);
+        fl.setPower(0.5);
         fr.setPower(0.5);
         bl.setPower(0.5);
-        br.setPower(-0.5);
-        sleep(20000);
+        br.setPower(0.5);
+        sleep(300);
+
+        fl.setPower(0.5);
+        fr.setPower(-0.5);
+        bl.setPower(-0.5);
+        br.setPower(0.5);
+        sleep(12000);
     }
 }

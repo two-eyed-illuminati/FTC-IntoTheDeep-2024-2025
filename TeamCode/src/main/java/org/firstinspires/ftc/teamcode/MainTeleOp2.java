@@ -28,13 +28,13 @@ public class MainTeleOp2 extends OpMode{
     final double[] MAX_GROUND_DISTANCE = {10+13, 10+13}; //Max ground length of slides
     final double[] MAX_PRESET_GROUND_DISTANCE = {10+13/2.0, 10+13/2.0}; //have a lower limit for max slide length for presets
     final double[] MIN_GROUND_HEIGHT = {4, 4};
-    final double[] FINGER_CLOSE_POS = {0.48, 0.48};
-    final double[] FINGER_OPEN_POS = {0.75, 0.75};
-    final double[] HAND_START_POS = {1.0, 1.0};
-    final double[] HAND_PARALLEL_POS = {0.365, 0.365}; //Pos where hand is parallel with slides
+    final double[] FINGER_CLOSE_POS = {0.45, 0.19};
+    final double[] FINGER_OPEN_POS = {0.8, 0.323};
+    final double[] HAND_START_POS = {1.0, 0.6176};
+    final double[] HAND_PARALLEL_POS = {0.4, 0.7249}; //Pos where hand is parallel with slides
     final double[] HAND_START_ANGLE = {Math.PI*0, Math.PI*0}; //Positive acute angle between hand start and slides
-    final double[] WRIST_START_POS = {0.1, 0.1};
-    final double[] WRIST_PERPEN_POS = {0.42, 0.42}; //Pos where wrist is perpendicular to slides
+    final double[] WRIST_START_POS = {0.1, 1};
+    final double[] WRIST_PERPEN_POS = {0.42, 0.6755}; //Pos where wrist is perpendicular to slides
     Gamepad2ControlState controlState = Gamepad2ControlState.PRESET;
     ToggleButton g1lT = new ToggleButton(); ToggleButton g2b = new ToggleButton(); ToggleButton g2rT = new ToggleButton();
     double targetGroundDistance = 12.0;

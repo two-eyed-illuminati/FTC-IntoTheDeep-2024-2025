@@ -23,14 +23,17 @@ public class TestSpeciServo extends OpMode {
     public void loop() {
         if(gamepad1.a) {
             servo = handServo;
+            position = handServo.getPosition();
             started = true;
         }
         if(gamepad1.b) {
             servo = fingerServo;
+            position = fingerServo.getPosition();
             started = true;
         }
         if(gamepad1.x) {
             servo = wristServo;
+            position = wristServo.getPosition();
             started = true;
         }
         position -= gamepad1.left_stick_y * 0.003;
@@ -41,6 +44,9 @@ public class TestSpeciServo extends OpMode {
             telemetry.addData("servo position", servo.getPosition());
             telemetry.addData("position", position);
         }
+        telemetry.addData("hand position", handServo.getPosition());
+        telemetry.addData("fingers position", fingerServo.getPosition());
+        telemetry.addData("wrist position", wristServo.getPosition());
         telemetry.update();
     }
 }
