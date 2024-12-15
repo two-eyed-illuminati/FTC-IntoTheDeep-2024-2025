@@ -29,6 +29,6 @@ public class MoveLeftAuto extends LinearOpMode {
         fr.setPower(0.5);
         bl.setPower(0.5);
         br.setPower(-0.5);
-        sleep(12000);
+        sleep(1000);
     }
 }
