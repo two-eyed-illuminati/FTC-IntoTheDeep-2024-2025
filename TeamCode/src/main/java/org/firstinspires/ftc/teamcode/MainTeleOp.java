@@ -8,11 +8,10 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.utils.ControlsToValues;
 import org.firstinspires.ftc.teamcode.utils.Drive;
+import org.firstinspires.ftc.teamcode.utils.RobotConstants;
 import org.firstinspires.ftc.teamcode.utils.Slide;
 import org.firstinspires.ftc.teamcode.utils.ToggleButton;
 import org.firstinspires.ftc.teamcode.utils.Turret;
@@ -25,38 +24,28 @@ enum Gamepad2ControlState{
 
 @TeleOp
 public class MainTeleOp extends OpMode{
-    Drive fod; Turret turretLeft; Slide slideLeft;
+    Drive fod;
+    Turret turretLeft; Slide slideLeft;
     Turret turretRight; Slide slideRight;
-    Servo speciFingers, speciHand, speciWrist;
     ControlsToValues slideCtv = new ControlsToValues();
     DcMotorEx fl, fr, bl, br;
     Servo fingers, hand, wrist;
-    final double SLIDE_PIVOT_GROUND_HEIGHT = 13.0;
-    final double MAX_GROUND_DISTANCE = 10+13; //Max ground length of slides
-    final double MAX_PRESET_GROUND_DISTANCE = 10+13/2.0; //have a lower limit for max slide length for presets
-    final double MIN_GROUND_HEIGHT = 5;
-    final double FINGER_CLOSE_POS = 0.309-0.035;
-    final double FINGER_OPEN_POS = 0.386-0.035;
-    final double HAND_START_POS = 1.0;
-    final double HAND_PARALLEL_POS = 0.4; //Pos where hand is parallel with slides
-    final double HAND_START_ANGLE = Math.PI*0; //Positive acute angle between hand start and slides
-    final double WRIST_START_POS = 0.1341;
-    final double WRIST_PERPEN_POS = 0.32+WRIST_START_POS; //Pos where wrist is perpendicular to slides
     Gamepad2ControlState controlState = Gamepad2ControlState.PRESET;
-    ToggleButton g1lT = new ToggleButton(); ToggleButton g2b = new ToggleButton(); ToggleButton g1a = new ToggleButton();
-    double targetGroundDistance = 18.0;
-    double targetSlideLength = 10; double targetTurretAngle = Math.PI*45/180; double targetSlideVelocity = 0;
-    double clawGrabHeight = 11;
+    ToggleButton g1lT = new ToggleButton(); ToggleButton g2b = new ToggleButton(); ToggleButton g1b = new ToggleButton();
+    ToggleButton g1dR = new ToggleButton(); ToggleButton g1dL = new ToggleButton();
+    double targetGroundDistance = 18.0; double clawGrabHeight = 11;
+    double targetSlideLength = 10; double targetSlideVelocity = 0;
+    double targetTurretAngle = Math.PI*45/180;
     double targetHandAngle;
     double targetHandPresetPos;
     double targetHandStartMoveTurretPos;
     List<LynxModule> allHubs;
 
     public double handPosFromAngle(double angle, double turretAngle){
-        return (angle-(Math.PI/2-turretAngle)+HAND_START_ANGLE)*(HAND_PARALLEL_POS-HAND_START_POS)/(Math.PI+HAND_START_ANGLE)+HAND_START_POS;
+        return (angle-(Math.PI/2-turretAngle)+RobotConstants.HAND_START_ANGLE)*(RobotConstants.HAND_PARALLEL_POS-RobotConstants.HAND_START_POS)/(Math.PI+RobotConstants.HAND_START_ANGLE)+RobotConstants.HAND_START_POS;
     }
     public double angleFromHandPos(double pos, double turretAngle){
-        return (pos-HAND_START_POS)*(Math.PI+HAND_START_ANGLE)/(HAND_PARALLEL_POS-HAND_START_POS)+(Math.PI/2-turretAngle)-HAND_START_ANGLE;
+        return (pos-RobotConstants.HAND_START_POS)*(Math.PI+RobotConstants.HAND_START_ANGLE)/(RobotConstants.HAND_PARALLEL_POS-RobotConstants.HAND_START_POS)+(Math.PI/2-turretAngle)-RobotConstants.HAND_START_ANGLE;
     }
     @Override
     public void init() {
@@ -75,27 +64,20 @@ public class MainTeleOp extends OpMode{
         slideLeft = new Slide(hardwareMap.get(DcMotorEx.class, "liftLeft"));
         slideCtv.cubicLowerSpeedValue = 0.2;
 
-        fingers = hardwareMap.get(Servo.class, "fingers"); fingers.setPosition(FINGER_CLOSE_POS);
-        hand = hardwareMap.get(Servo.class, "hand"); hand.setPosition(HAND_START_POS);
-        targetHandPresetPos = HAND_START_POS;
+        fingers = hardwareMap.get(Servo.class, "fingers"); fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
+        hand = hardwareMap.get(Servo.class, "hand"); hand.setPosition(RobotConstants.HAND_START_POS);
+        targetHandPresetPos = RobotConstants.HAND_START_POS;
         targetHandStartMoveTurretPos = Math.PI*0/180;
-        wrist = hardwareMap.get(Servo.class, "wrist"); wrist.setPosition(WRIST_START_POS);
+        wrist = hardwareMap.get(Servo.class, "wrist"); wrist.setPosition(RobotConstants.WRIST_START_POS);
 
         DcMotorEx turretRightMotor = hardwareMap.get(DcMotorEx.class, "turretRight");
         turretRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
         turretRight = new Turret(turretRightMotor);
         DcMotorEx slideRightMotor = hardwareMap.get(DcMotorEx.class, "liftRight");
-        slideRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        slideRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
         slideRight = new Slide(slideRightMotor);
         slideRight.setLength(10);
         turretRight.setAngleRadians(Math.PI*45/180);
-
-        speciFingers = hardwareMap.get(Servo.class, "speciFingers");
-        speciHand = hardwareMap.get(Servo.class, "speciHand");
-        speciWrist = hardwareMap.get(Servo.class, "speciWrist");
-        speciFingers.setPosition(0.19);
-        speciHand.setPosition(0.6176+0.015);
-        speciWrist.setPosition(1);
 
         allHubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule module : allHubs) {
@@ -138,27 +120,27 @@ public class MainTeleOp extends OpMode{
                 controlState = Gamepad2ControlState.GRAB;
                 targetGroundDistance = 18.0;
                 clawGrabHeight = 11;
-                fingers.setPosition(FINGER_OPEN_POS);
-                wrist.setPosition(WRIST_PERPEN_POS);
+                fingers.setPosition(RobotConstants.FINGER_OPEN_POS);
+                wrist.setPosition(RobotConstants.WRIST_PERPEN_POS);
             }
             else {
                 controlState = Gamepad2ControlState.PRESET;
                 targetSlideLength = 10;
                 targetSlideVelocity = (537.7*312.0/60.0);
                 targetTurretAngle = Math.PI*50/180;
-                fingers.setPosition(FINGER_CLOSE_POS);
-                wrist.setPosition(WRIST_START_POS);
-                targetHandPresetPos = HAND_START_POS;
+                fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
+                wrist.setPosition(RobotConstants.WRIST_START_POS);
+                targetHandPresetPos = RobotConstants.HAND_START_POS;
                 targetHandStartMoveTurretPos = Math.PI*0/180;
             }
         }
 
-        if(g2b.activated(gamepad2.b) || (controlState.equals(Gamepad2ControlState.GRAB) && g1a.activated(gamepad1.b))) {
-            if(Math.abs(fingers.getPosition() - FINGER_CLOSE_POS) < 0.02){
-                fingers.setPosition(FINGER_OPEN_POS);
+        if(g2b.activated(gamepad2.b) || (controlState.equals(Gamepad2ControlState.GRAB) && g1b.activated(gamepad1.b))) {
+            if(Math.abs(fingers.getPosition() - RobotConstants.FINGER_CLOSE_POS) < 0.02){
+                fingers.setPosition(RobotConstants.FINGER_OPEN_POS);
             }
             else{
-                fingers.setPosition(FINGER_CLOSE_POS);
+                fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
             }
         }
 
@@ -167,9 +149,9 @@ public class MainTeleOp extends OpMode{
             targetSlideLength = 10;
             targetSlideVelocity = (537.7*312.0/60.0);
             targetTurretAngle = Math.PI*50/180;
-            fingers.setPosition(FINGER_CLOSE_POS);
-            wrist.setPosition(WRIST_START_POS);
-            targetHandPresetPos = HAND_START_POS;
+            fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
+            wrist.setPosition(RobotConstants.WRIST_START_POS);
+            targetHandPresetPos = RobotConstants.HAND_START_POS;
             targetHandStartMoveTurretPos = Math.PI*0/180;
         }
         if(gamepad2.x){
@@ -177,8 +159,8 @@ public class MainTeleOp extends OpMode{
             targetSlideLength = Math.sqrt(Math.pow(11.5, 2) + Math.pow(12, 2));
             targetSlideVelocity = (537.7*312.0/60.0);
             targetTurretAngle = Math.atan2(11.5, 12)+Math.PI*90/180;
-            fingers.setPosition(FINGER_CLOSE_POS);
-            wrist.setPosition(WRIST_PERPEN_POS);
+            fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
+            wrist.setPosition(RobotConstants.WRIST_PERPEN_POS);
             targetHandPresetPos = handPosFromAngle(Math.PI*180/180, Math.atan2(11.5, 12)+Math.PI*90/180);
             targetHandStartMoveTurretPos = Math.PI*90/180;
         }
@@ -187,26 +169,26 @@ public class MainTeleOp extends OpMode{
             targetSlideLength = 40;
             targetSlideVelocity = 0.75*(537.7*312.0/60.0);
             targetTurretAngle = Math.PI*165/180;
-            fingers.setPosition(FINGER_CLOSE_POS);
-            wrist.setPosition(WRIST_START_POS);
+            fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
+            wrist.setPosition(RobotConstants.WRIST_START_POS);
             targetHandPresetPos = handPosFromAngle(Math.PI*180/180, Math.PI*165/180);
             targetHandStartMoveTurretPos = Math.PI*90/180;
         }
 
         if(gamepad2.dpad_right){
-            wrist.setPosition(WRIST_START_POS);
+            wrist.setPosition(RobotConstants.WRIST_START_POS);
         }
         else if(gamepad2.dpad_left){
-            wrist.setPosition(WRIST_PERPEN_POS);
+            wrist.setPosition(RobotConstants.WRIST_PERPEN_POS);
         }
-        if(controlState.equals(Gamepad2ControlState.GRAB) && gamepad1.dpad_right){
-            if(wrist.getPosition() > WRIST_START_POS+0.02){
-                wrist.setPosition(wrist.getPosition()-(WRIST_PERPEN_POS-WRIST_START_POS)/2.0);
+        if(controlState.equals(Gamepad2ControlState.GRAB) && g1dR.activated(gamepad1.dpad_right)){
+            if(wrist.getPosition() > RobotConstants.WRIST_START_POS+0.02){
+                wrist.setPosition(wrist.getPosition()-(RobotConstants.WRIST_PERPEN_POS-RobotConstants.WRIST_START_POS)/2.0);
             }
         }
-        else if(controlState.equals(Gamepad2ControlState.GRAB) && gamepad1.dpad_left){
-            if(wrist.getPosition() < WRIST_PERPEN_POS-0.02){
-                wrist.setPosition(wrist.getPosition()+(WRIST_PERPEN_POS-WRIST_START_POS)/2.0);
+        else if(controlState.equals(Gamepad2ControlState.GRAB) && g1dL.activated(gamepad1.dpad_left)){
+            if(wrist.getPosition() < RobotConstants.WRIST_PERPEN_POS-0.02){
+                wrist.setPosition(wrist.getPosition()+(RobotConstants.WRIST_PERPEN_POS-RobotConstants.WRIST_START_POS)/2.0);
             }
         }
 
@@ -234,21 +216,21 @@ public class MainTeleOp extends OpMode{
                 targetGroundDistance += gamepad1.dpad_down ? -0.6 : 0;
             }
             targetGroundDistance = Math.max(targetGroundDistance, 6.0);
-            targetGroundDistance = Math.min(targetGroundDistance, MAX_GROUND_DISTANCE);
+            targetGroundDistance = Math.min(targetGroundDistance, RobotConstants.MAX_GROUND_DISTANCE);
             clawGrabHeight += gamepad1.y ? (gamepad1.right_trigger > 0.8 ? 0.5 : 1) : 0;
             clawGrabHeight -= gamepad1.a ? (gamepad1.right_trigger > 0.8 ? 0.5 : 1) : 0;
-            clawGrabHeight = Math.max(clawGrabHeight, MIN_GROUND_HEIGHT);
-            clawGrabHeight = Math.min(clawGrabHeight, SLIDE_PIVOT_GROUND_HEIGHT-0.01);
+            clawGrabHeight = Math.max(clawGrabHeight, RobotConstants.MIN_GROUND_HEIGHT);
+            clawGrabHeight = Math.min(clawGrabHeight, RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT-0.01);
 
-            turretLeft.setAngleRadians(Math.atan(targetGroundDistance / (SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight)));
-            slideLeft.setLength(Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight, 2)));
+            turretLeft.setAngleRadians(Math.atan(targetGroundDistance / (RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight)));
+            slideLeft.setLength(Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight, 2)));
 
-            targetTurretAngle = Math.atan(targetGroundDistance / (SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight));
+            targetTurretAngle = Math.atan(targetGroundDistance / (RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight));
             targetTurretAngle = Math.min(turretLeft.getAngleRadians() + Math.PI / 12, targetTurretAngle);
             targetTurretAngle = Math.max(turretLeft.getAngleRadians() - Math.PI / 12, targetTurretAngle);
-            targetSlideLength = Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight, 2));
+            targetSlideLength = Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight, 2));
 
-            telemetry.addData("Target Turret Angle: ", targetTurretAngle);
+            telemetry.addData("Target Turret Angle: ", targetTurretAngle*180/Math.PI);
             telemetry.addData("Target Hand Pos: ", handPosFromAngle(Math.PI*270/180, targetTurretAngle));
             hand.setPosition(handPosFromAngle(Math.PI*270/180, targetTurretAngle));
         }
@@ -264,15 +246,15 @@ public class MainTeleOp extends OpMode{
                 if(futureGroundDistance > MAX_PRESET_GROUND_DISTANCE){
                     currTargetSlideLength = MAX_PRESET_GROUND_DISTANCE / Math.sin(turretLeft.getAngleRadians());
                 }
-                if(Math.abs(futureGroundDistance - MAX_PRESET_GROUND_DISTANCE) < 2){
+                if(Math.abs(futureGroundDistance - RobotConstants.MAX_PRESET_GROUND_DISTANCE) < 2){
                     currTargetSlideVelocity = 0.1*targetSlideVelocity;
                 }
                 if(turretLeft.getAngleRadians() > targetHandStartMoveTurretPos){
                     hand.setPosition(targetHandPresetPos);
                 }
-//                double futureGroundHeight = SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turretLeft.getAngleRadians()) * slideLeft.getLength();
-//                if(futureGroundHeight < MIN_GROUND_HEIGHT){
-//                    currTargetTurretAngle = Math.acos((SLIDE_PIVOT_GROUND_HEIGHT - MIN_GROUND_HEIGHT) / slideLeft.getLength());
+//                double futureGroundHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turretLeft.getAngleRadians()) * slideLeft.getLength();
+//                if(futureGroundHeight < RobotConstants.MIN_GROUND_HEIGHT){
+//                    currTargetTurretAngle = Math.acos((RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - RobotConstants.MIN_GROUND_HEIGHT) / slideLeft.getLength());
 //                    currTargetTurretAngle = Math.min(turretLeft.getAngleRadians() + Math.PI / 12, currTargetTurretAngle);
 //                    currTargetTurretAngle = Math.max(turretLeft.getAngleRadians() - Math.PI / 12, currTargetTurretAngle);
 //                }
@@ -289,13 +271,13 @@ public class MainTeleOp extends OpMode{
             targetTurretAngle = Math.max(turretLeft.getAngleRadians() - Math.PI / 24, targetTurretAngle);
 
             double futureGroundDistance = Math.sin(targetTurretAngle) * slideLeft.getLength();
-            if(futureGroundDistance > MAX_GROUND_DISTANCE){
-                targetSlideLength = MAX_GROUND_DISTANCE / Math.sin(targetTurretAngle);
+            if(futureGroundDistance > RobotConstants.MAX_GROUND_DISTANCE){
+                targetSlideLength = RobotConstants.MAX_GROUND_DISTANCE / Math.sin(targetTurretAngle);
                 targetSlideVelocity = (537.7*312.0/60.0);
             }
-            double futureGroundHeight = SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(targetTurretAngle) * slideLeft.getLength();
-            if(futureGroundHeight < MIN_GROUND_HEIGHT){
-                targetTurretAngle = Math.acos((SLIDE_PIVOT_GROUND_HEIGHT - MIN_GROUND_HEIGHT) / slideLeft.getLength());
+            double futureGroundHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(targetTurretAngle) * slideLeft.getLength();
+            if(futureGroundHeight < RobotConstants.MIN_GROUND_HEIGHT){
+                targetTurretAngle = Math.acos((RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - RobotConstants.MIN_GROUND_HEIGHT) / slideLeft.getLength());
                 targetTurretAngle = Math.min(turretLeft.getAngleRadians() + Math.PI / 12, targetTurretAngle);
                 targetTurretAngle = Math.max(turretLeft.getAngleRadians() - Math.PI / 12, targetTurretAngle);
             }

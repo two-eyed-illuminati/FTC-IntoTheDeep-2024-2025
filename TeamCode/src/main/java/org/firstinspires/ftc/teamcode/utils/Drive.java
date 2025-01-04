@@ -10,7 +10,9 @@ public class Drive {
     public IMU imu;
     ControlsToValues ctv = new ControlsToValues();
 
-    public double rotSpeed = 1.0;
+    //TODO increase when aashil gets better at driving
+    public double rotSpeed = 0.6;
+    public double moveSpeed = 0.6;
 
     public Drive(DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br, IMU imu){
         this.fl = fl;
@@ -62,7 +64,7 @@ public class Drive {
     public double[] driveFieldCentric(double x, double y, double rotation, ControlsToValues ctv){
         double currRobotHeading = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        double targetSpeed = ctv.targetSpeedFromJoysticks(x, y);
+        double targetSpeed = ctv.targetSpeedFromJoysticks(x, y)*moveSpeed;
 
         double targetFieldOrientedMoveHeading = -Math.atan2(-x, y);
         double targetRobotOrientedMoveHeading = targetFieldOrientedMoveHeading - currRobotHeading;
@@ -70,12 +72,12 @@ public class Drive {
         double targetRobotOrientedXMove = Math.sin(targetRobotOrientedMoveHeading) * targetSpeed;
         double targetRobotOrientedYMove = Math.cos(targetRobotOrientedMoveHeading) * targetSpeed;
 
-        double targetRotSpeed = ctv.targetSpeedFromJoysticks(rotation)*Math.signum(rotation);
+        double targetRotSpeed = ctv.targetSpeedFromJoysticks(rotation)*Math.signum(rotation)*rotSpeed;
 
-        double flSpeed = targetRobotOrientedYMove + targetRobotOrientedXMove + targetRotSpeed * rotSpeed;
-        double frSpeed = targetRobotOrientedYMove - targetRobotOrientedXMove - targetRotSpeed * rotSpeed;
-        double blSpeed = targetRobotOrientedYMove - targetRobotOrientedXMove + targetRotSpeed * rotSpeed;
-        double brSpeed = targetRobotOrientedYMove + targetRobotOrientedXMove - targetRotSpeed * rotSpeed;
+        double flSpeed = targetRobotOrientedYMove + targetRobotOrientedXMove + targetRotSpeed;
+        double frSpeed = targetRobotOrientedYMove - targetRobotOrientedXMove - targetRotSpeed;
+        double blSpeed = targetRobotOrientedYMove - targetRobotOrientedXMove + targetRotSpeed;
+        double brSpeed = targetRobotOrientedYMove + targetRobotOrientedXMove - targetRotSpeed;
 
         double maxSpeed = Math.max(Math.max(Math.abs(flSpeed), Math.abs(frSpeed)), Math.max(Math.abs(blSpeed), Math.abs(brSpeed)));
         if(maxSpeed > 1){

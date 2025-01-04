@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 public class Slide {
     public DcMotorEx slideMotor;
-    final double PULSES_PER_INCH = 114.597403; //Encoder:6 Length 9.5, Encoder:2212 Length:28.75
+    public final double PULSES_PER_INCH = 114.597403; //Encoder:6 Length 9.5, Encoder:2212 Length:28.75
     final double COLLAPSED_LENGTH = 10.0; // Length from pivot point to claw
     final double MAX_PULSES = 3150.0; // Maximum encoder value for fully extended slide
 

@@ -22,6 +22,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.utils.Slide;
 import org.firstinspires.ftc.teamcode.utils.Turret;
@@ -30,7 +31,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 
 @Autonomous
-public class AutoRedLeft extends LinearOpMode {
+public class AutoRedLeftTest extends LinearOpMode {
     class Preset implements Action{
         double turretAngle;
         double slideLength;
@@ -77,10 +78,13 @@ public class AutoRedLeft extends LinearOpMode {
                 oldTurretAngle = currTurretAngle;
                 oldSlideLength = currSlideLength;
             }
+//            telemetry.addData()
             else if(Math.abs(oldTurretAngle - currTurretAngle) < Math.PI*2/180 && Math.abs(oldSlideLength - currSlideLength) < 0.5){
                 if(Math.abs(currTurretAngle - turretAngle) < Math.PI*2/180 && Math.abs(currSlideLength - slideLength) < 0.5){
                     return false;
                 }
+                oldTurretAngle = currTurretAngle;
+                oldSlideLength = currSlideLength;
             }
             return true;
         }
@@ -99,6 +103,35 @@ public class AutoRedLeft extends LinearOpMode {
             return false;
         }
     }
+    class Forward implements Action{
+        ElapsedTime timer = new ElapsedTime();
+        boolean justStarted = true;
+        public Forward(){
+            timer.reset();
+            justStarted = true;
+        }
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet){
+            if(justStarted){
+                justStarted = false;
+                timer.reset();
+            }
+            if(timer.milliseconds() < 1000){
+                fl.setPower(0.75);
+                fr.setPower(0.75);
+                bl.setPower(0.75);
+                br.setPower(0.75);
+                return true;
+            }
+            else{
+                fl.setPower(0);
+                fr.setPower(0);
+                bl.setPower(0);
+                br.setPower(0);
+                return false;
+            }
+        }
+    }
     MecanumDrive drive;
     Slide slide;
     Turret turret;
@@ -114,6 +147,7 @@ public class AutoRedLeft extends LinearOpMode {
     final double HAND_START_ANGLE = Math.PI*0; //Positive acute angle between hand start and slides
     final double WRIST_START_POS = 0.1341;
     final double WRIST_PERPEN_POS = 0.32+WRIST_START_POS; //Pos where wrist is perpendicular to slides
+    DcMotorEx fl, fr, bl, br;
     public double handPosFromAngle(double angle, double turretAngle){
         return (angle-(Math.PI/2-turretAngle)+Math.PI*0/180)*(HAND_PARALLEL_POS-HAND_START_POS)/(Math.PI*180/180)+HAND_START_POS;
     }
@@ -121,7 +155,6 @@ public class AutoRedLeft extends LinearOpMode {
     @Override
     public void runOpMode(){
         Pose2d initialPose = new Pose2d(0, 0, 0);
-        DcMotorEx fl, fr, bl, br;
         fl = hardwareMap.get(DcMotorEx.class, "frontLeft");
         fr = hardwareMap.get(DcMotorEx.class, "frontRight");
         bl = hardwareMap.get(DcMotorEx.class, "backLeft");
@@ -130,6 +163,10 @@ public class AutoRedLeft extends LinearOpMode {
         fr.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         bl.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         br.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         IMU imu = hardwareMap.get(IMU.class, "imu");
         imu.resetYaw();
         drive = new MecanumDrive(hardwareMap, initialPose);
@@ -141,14 +178,14 @@ public class AutoRedLeft extends LinearOpMode {
         fingers = hardwareMap.get(Servo.class, "fingers");
 
         VelConstraint baseVelConstraint = new MinVelConstraint(Arrays.asList(
-                new TranslationalVelConstraint(5.0),
+                new TranslationalVelConstraint(50.0),
                 new AngularVelConstraint(Math.PI / 2)
         ));
         AccelConstraint baseAccelConstraint = new ProfileAccelConstraint(-10.0, 25.0);
 
         TrajectoryActionBuilder forward = drive.actionBuilder(initialPose)
                 .setTangent(0)
-                        .lineToX((26), baseVelConstraint);
+                .lineToX(26);
         Action forwardAction = forward.build();
         TrajectoryActionBuilder strafe = forward.endTrajectory().fresh().strafeTo(new Vector2d(26, 26), baseVelConstraint);
         Action strafeAction = strafe.build();
@@ -177,21 +214,23 @@ public class AutoRedLeft extends LinearOpMode {
 
         waitForStart();
 
-        turret.setAngleRadians(Math.atan2(13, 8)+Math.PI*90/180);
-                slide.setLength(Math.sqrt(Math.pow(13, 2) + Math.pow(8, 2)));
-                hand.setPosition(handPosFromAngle(Math.PI*180/180, Math.atan2(13, 8)+Math.PI*90/180));
-                sleep(2000);
+//        turret.setAngleRadians(Math.atan2(13, 8)+Math.PI*90/180);
+//        slide.setLength(Math.sqrt(Math.pow(13, 2) + Math.pow(8, 2)));
+//        hand.setPosition(handPosFromAngle(Math.PI*180/180, Math.atan2(13, 8)+Math.PI*90/180));
+////        sleep(2000);
+//        fl.setPower(0.75);
+//        fr.setPower(0.75);
+//        bl.setPower(0.75);
+//        br.setPower(0.75);
+//        sleep(2000);
 
         Actions.runBlocking(
                 new SequentialAction(
-                new ParallelAction(forwardAction, highChamberPreset),
-                        new Release(),
-                        defaultPreset,
-                        strafeAction,
-                        grabPreset,
-                        new Grab()
-//                        new ParallelAction(turnAction, highBasketPreset)
-                )
-        );
+                        highChamberPreset,
+                        forwardAction));
+//                        highChamberPreset,
+//                        new Release()
+//                )
+//        );
     }
 }
