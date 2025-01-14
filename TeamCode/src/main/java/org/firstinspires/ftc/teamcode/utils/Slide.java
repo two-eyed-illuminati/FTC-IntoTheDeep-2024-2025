@@ -4,10 +4,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 public class Slide {
-    public DcMotorEx slideMotor;
-    public final double PULSES_PER_INCH = 114.597403; //Encoder:6 Length 9.5, Encoder:2212 Length:28.75
+    public DcMotorEx slideMotor; //435 rpm
+    public final double PULSES_PER_INCH = (2208.0)/(36.75-10);
     final double COLLAPSED_LENGTH = 10.0; // Length from pivot point to claw
-    final double MAX_PULSES = 3150.0; // Maximum encoder value for fully extended slide
+    final double MAX_PULSES = 2208.0; // Maximum encoder value for fully extended slide
 
     public Slide(DcMotorEx slideMotor) {
         this.slideMotor = slideMotor;
@@ -23,7 +23,7 @@ public class Slide {
         pulses = Math.max(pulses, 50);
 
         slideMotor.setTargetPosition((int) pulses);
-        maxVelocity = Math.min(maxVelocity, 537.7*312.0/60.0);
+        maxVelocity = Math.min(maxVelocity, 384.5*435.0/60.0);
         slideMotor.setVelocity(maxVelocity);
     }
     public void setLength(double lengthInches){

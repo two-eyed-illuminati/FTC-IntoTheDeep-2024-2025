@@ -4,10 +4,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 public class Turret {
-    public DcMotorEx turretMotor;
+    public DcMotorEx turretMotor; //30 rpm
     final double PULSES_PER_REVOLUTION = 5281.1*4; // 4 is gear ratio
-    final double RESTING_ANGLE_RADIANS = Math.PI*45.0/180.0;
-    final double MAX_PULSES = 7900;
+    final double RESTING_ANGLE_RADIANS = Math.PI*120.0/180.0;
+    final double MAX_PULSES = (1.0/6.0)*(5281.1*4);
 
     public Turret(DcMotorEx turretMotor) {
         this.turretMotor = turretMotor;
@@ -23,7 +23,7 @@ public class Turret {
 
         double angleDegrees = angleRadians * 180 / Math.PI;
         double pulses = angleDegrees * PULSES_PER_REVOLUTION / 360;
-        pulses = Math.max(20, pulses);
+        pulses = Math.max(-(1.0/6.0)*(5281.1*4), pulses);
         pulses = Math.min(MAX_PULSES, pulses);
 
         maxVelocity = Math.min(maxVelocity, 5281.1*30.0/60.0);
