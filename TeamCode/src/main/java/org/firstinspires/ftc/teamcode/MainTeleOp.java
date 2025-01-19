@@ -53,6 +53,9 @@ public class MainTeleOp extends OpMode{
     }
     @Override
     public void init() {
+        telemetry.addLine("REMINDER: Lift turret up and retract slides");
+        telemetry.update();
+
         fl = hardwareMap.get(DcMotorEx.class, "frontLeft");
         fl.setDirection(DcMotorEx.Direction.REVERSE);
         fr = hardwareMap.get(DcMotorEx.class, "frontRight");
