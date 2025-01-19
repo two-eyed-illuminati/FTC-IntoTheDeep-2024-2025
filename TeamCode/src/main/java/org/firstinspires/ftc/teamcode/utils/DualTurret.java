@@ -10,9 +10,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 public class DualTurret {
     public DcMotorEx turretMotor1;
     public DcMotorEx turretMotor2;
-    final double PULSES_PER_REVOLUTION = 5281.1*4; // 4 is gear ratio
-    final double RESTING_ANGLE_RADIANS = Math.PI*120.0/180.0;
-    final double MAX_PULSES = (1.0/6.0)*(5281.1*4);
+    public final double PULSES_PER_REVOLUTION = 5281.1*4; // 4 is gear ratio
+    public final double RESTING_ANGLE_RADIANS = Math.PI*120.0/180.0;
+    public final double MAX_PULSES = (1.0/6.0)*(5281.1*4);
 
     public DualTurret(DcMotorEx turretMotor1, DcMotorEx turretMotor2) {
         this.turretMotor1 = turretMotor1;
@@ -43,11 +43,11 @@ public class DualTurret {
         double m1Error = Math.abs(pulses - turretMotor1.getCurrentPosition());
         double m2Error = Math.abs(pulses - turretMotor2.getCurrentPosition());
 
-        double m1Velocity = maxVelocity*(1+10*(m1Error-m2Error)/PULSES_PER_REVOLUTION);
+        double m1Velocity = maxVelocity*(1+5*(m1Error-m2Error)/PULSES_PER_REVOLUTION);
         m1Velocity = Math.min(m1Velocity, 5281.1*30.0/60.0);
         turretMotor1.setVelocity(m1Velocity);
 
-        double m2Velocity = maxVelocity*(1+10*(m2Error-m1Error)/PULSES_PER_REVOLUTION);
+        double m2Velocity = maxVelocity*(1+5*(m2Error-m1Error)/PULSES_PER_REVOLUTION);
         m2Velocity = Math.min(m2Velocity, 5281.1*30.0/60.0);
         turretMotor2.setVelocity(m2Velocity);
     }

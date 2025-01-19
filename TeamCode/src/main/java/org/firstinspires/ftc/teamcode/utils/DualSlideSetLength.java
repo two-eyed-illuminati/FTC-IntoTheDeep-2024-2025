@@ -16,12 +16,12 @@ public class DualSlideSetLength implements Action {
         this.maxVelocity = maxVelocity;
     }
     public DualSlideSetLength(DualSlide slides, double targetLengthInches){
-        this(slides, targetLengthInches, 100000);
+        this(slides, targetLengthInches, 1000);
     }
 
     @Override
     public boolean run(@NonNull TelemetryPacket packet){
         slides.setLength(targetLengthInches, maxVelocity);
-        return Math.abs(slides.getLength() - targetLengthInches) < margin;
+        return Math.abs(slides.getLength() - targetLengthInches) > margin;
     }
 }

@@ -186,15 +186,6 @@ public class MainTeleOp2 extends OpMode{
             wrist[currSide].setPosition(WRIST_PERPEN_POS[currSide]);
         }
 
-        if(gamepad2.dpad_up){
-            controlState = Gamepad2ControlState.OUTTAKE;
-            targetHandAngle = Math.PI*180/180;
-        }
-        else if(gamepad2.dpad_down){
-            controlState = Gamepad2ControlState.OUTTAKE;
-            targetHandAngle = Math.PI*0/180;
-        }
-
         if(gamepad2.right_bumper) {
             controlState = Gamepad2ControlState.MANUAL_CONTROL;
         }
@@ -237,7 +228,7 @@ public class MainTeleOp2 extends OpMode{
                 slides[currSide].setLength(currTargetSlideLength, currTargetSlideVelocity);
             }
         }
-        if(controlState.equals(Gamepad2ControlState.MANUAL_CONTROL) || controlState.equals(Gamepad2ControlState.OUTTAKE)){
+        if(controlState.equals(Gamepad2ControlState.MANUAL_CONTROL)){
             targetSlideLength = 10000 * -gamepad2.right_stick_y;
             targetSlideVelocity = slideCtv.targetSpeedFromJoysticks(-gamepad2.right_stick_y) * (537.7*312.0/60.0);
 
@@ -259,9 +250,6 @@ public class MainTeleOp2 extends OpMode{
 
             turrets[currSide].setAngleRadians(targetTurretAngle);
             slides[currSide].setLength(targetSlideLength, targetSlideVelocity);
-        }
-        if(controlState.equals(Gamepad2ControlState.OUTTAKE)){
-            hand[currSide].setPosition(handPosFromAngle(targetHandAngle, turrets[currSide].getAngleRadians()));
         }
 
         telemetry.update();
