@@ -4,12 +4,16 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.utils.ToggleButton;
+
 @TeleOp
 public class TestServo extends OpMode {
     Servo handServo;
     Servo fingerServo;
     Servo wristServo;
     Servo servo;
+    ToggleButton dpadUp = new ToggleButton();
+    ToggleButton dpadDown = new ToggleButton();
     double position = 0.0;
     boolean started = false;
     @Override
@@ -37,6 +41,8 @@ public class TestServo extends OpMode {
             started = true;
         }
         position -= gamepad1.left_stick_y * 0.003 * (gamepad1.left_trigger > 0.8 ? 0.1 : 1.0);
+        if(dpadUp.activated(gamepad1.dpad_up)) position += 0.005;
+        if(dpadDown.activated(gamepad1.dpad_down)) position -= 0.005;
         position = Math.min(1.0, Math.max(0.0, position));
         telemetry.addLine("A: hand, B: fingers, X: wrist");
         if(started){

@@ -7,7 +7,7 @@ import com.acmerobotics.roadrunner.Action;
 
 public class DualSlideSetLength implements Action {
     DualSlide slides;
-    double targetLengthInches;
+    public double targetLengthInches;
     double maxVelocity;
     double margin = 0.5;
     public DualSlideSetLength(DualSlide slides, double targetLengthInches, double maxVelocity){
@@ -16,12 +16,14 @@ public class DualSlideSetLength implements Action {
         this.maxVelocity = maxVelocity;
     }
     public DualSlideSetLength(DualSlide slides, double targetLengthInches){
-        this(slides, targetLengthInches, 1000);
+        this(slides, targetLengthInches, 100000);
     }
-
+    public boolean stillRunning(){
+        return Math.abs(slides.getLength() - targetLengthInches) > margin;
+    }
     @Override
     public boolean run(@NonNull TelemetryPacket packet){
         slides.setLength(targetLengthInches, maxVelocity);
-        return Math.abs(slides.getLength() - targetLengthInches) > margin;
+        return stillRunning();
     }
 }
