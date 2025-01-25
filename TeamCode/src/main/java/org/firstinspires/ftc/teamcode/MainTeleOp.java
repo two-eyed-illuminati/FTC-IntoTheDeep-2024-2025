@@ -227,10 +227,11 @@ public class MainTeleOp extends OpMode{
             if(futureGroundDistance > RobotConstants.MAX_PRESET_GROUND_DISTANCE){
                 slides.setLength(RobotConstants.MAX_PRESET_GROUND_DISTANCE / Math.sin(turrets.getAngleRadians()));
             }
-
-            TelemetryPacket packet = new TelemetryPacket();
-            if(!presetAction.run(packet)) {
-                presetAction = new NullAction();
+            else{
+                TelemetryPacket packet = new TelemetryPacket();
+                if(!presetAction.run(packet)) {
+                    presetAction = new NullAction();
+                }
             }
         }
         if(controlState.equals(Gamepad2ControlState.MANUAL_CONTROL)){
