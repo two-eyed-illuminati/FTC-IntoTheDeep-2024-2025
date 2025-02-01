@@ -1,5 +1,11 @@
 package org.firstinspires.ftc.teamcode.utils;
 
+//Turns a joystick (or other) input into a speed value
+//The point is that often, we want to have a non-linear relationship between joystick input and speed
+//Ex. setting drive motor power to less than 0.2 usually results in the robot not moving
+//so if the joystick input was 0.2, we would want a higher motor power
+//Also, this helps with precision control, since more of the joystick input is used for lower, but nonzero speed
+//Plug the equation into desmos to get a better understanding
 public class ControlsToValues {
     public double cubicLowerSpeedValue = 0.4;
     public enum Type{
