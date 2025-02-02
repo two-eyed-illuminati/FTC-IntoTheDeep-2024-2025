@@ -24,6 +24,8 @@ public class DualTurretAction implements Action {
         this.maxVelocity = 5281.1*30.0/60.0;
         this.margin = Math.PI * 2 / 180;
     }
+    //Use a builder pattern
+    //Allows for lines like this: new DualTurretAction(turrets).setTargetAngleRadians(0).setMode(Mode.GO_ABOVE);
     public DualTurretAction setMode(Mode mode){
         this.mode = mode;
         return this;

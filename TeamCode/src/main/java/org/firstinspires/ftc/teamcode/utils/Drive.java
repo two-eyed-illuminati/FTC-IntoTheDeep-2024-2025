@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class Drive {
     public DcMotorEx fl, fr, bl, br;
     public IMU imu;
-    ControlsToValues ctv = new ControlsToValues();
+    ControlsToValues ctv;
 
     //TODO increase when aashil gets better at driving
     public double rotSpeed = 0.6;
@@ -20,6 +20,7 @@ public class Drive {
         this.bl = bl;
         this.br = br;
         this.imu = imu;
+        this.ctv = new ControlsToValues();
     }
 
     public void resetImu(){
@@ -64,7 +65,7 @@ public class Drive {
     public double[] driveFieldCentric(double x, double y, double rotation, ControlsToValues ctv){
         double currRobotHeading = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        double targetSpeed = ctv.targetSpeedFromJoysticks(x, y)*moveSpeed;
+        double targetSpeed = ctv.targetSpeedFromJoysticks(x, y);
 
         double targetFieldOrientedMoveHeading = -Math.atan2(-x, y);
         double targetRobotOrientedMoveHeading = targetFieldOrientedMoveHeading - currRobotHeading;

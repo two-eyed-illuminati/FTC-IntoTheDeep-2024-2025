@@ -35,7 +35,7 @@ public class MainTeleOp2 extends OpMode{
     final double[] HAND_START_ANGLE = {Math.PI*0, Math.PI*0}; //Positive acute angle between hand start and slides
     final double[] WRIST_START_POS = {0.1, 1};
     final double[] WRIST_PERPEN_POS = {0.42, 0.6755}; //Pos where wrist is perpendicular to slides
-    Gamepad2ControlState controlState = Gamepad2ControlState.PRESET;
+    ControlState controlState = ControlState.PRESET;
     ToggleButton g1lT = new ToggleButton(); ToggleButton g2b = new ToggleButton(); ToggleButton g2rT = new ToggleButton();
     double targetGroundDistance = 12.0;
     double targetSlideLength = 10; double targetTurretAngle = Math.PI*45/180; double targetSlideVelocity = 0;
@@ -97,7 +97,7 @@ public class MainTeleOp2 extends OpMode{
 
         //TODO: test
         double[] motorPowers = new double[10];
-        if(controlState.equals(Gamepad2ControlState.GRAB)){
+        if(controlState.equals(ControlState.GRAB)){
             //Drive a bit forward to make sure robot is as forward as it can be
             double yDrive = 0.3;
 
@@ -131,14 +131,14 @@ public class MainTeleOp2 extends OpMode{
         }
 
         if(g1lT.activated(gamepad1.left_trigger > 0.8)) {
-            if(!controlState.equals(Gamepad2ControlState.GRAB)) {
-                controlState = Gamepad2ControlState.GRAB;
+            if(!controlState.equals(ControlState.GRAB)) {
+                controlState = ControlState.GRAB;
                 targetGroundDistance = 12.0;
                 clawGrabHeight = 8.25;
                 fingers[currSide].setPosition(FINGER_OPEN_POS[currSide]);
             }
             else {
-                controlState = Gamepad2ControlState.MANUAL_CONTROL;
+                controlState = ControlState.MANUAL_CONTROL;
             }
         }
 
@@ -152,7 +152,7 @@ public class MainTeleOp2 extends OpMode{
         }
 
         if(gamepad2.a){
-            controlState = Gamepad2ControlState.PRESET;
+            controlState = ControlState.PRESET;
             targetSlideLength = 10;
             targetSlideVelocity = (537.7*312.0/60.0);
             targetTurretAngle = Math.PI*50/180;
@@ -161,7 +161,7 @@ public class MainTeleOp2 extends OpMode{
             hand[currSide].setPosition(HAND_START_POS[currSide]);
         }
         if(gamepad2.x){
-            controlState = Gamepad2ControlState.PRESET;
+            controlState = ControlState.PRESET;
             targetSlideLength = Math.sqrt(Math.pow(11.5, 2) + Math.pow(12, 2));
             targetSlideVelocity = (537.7*312.0/60.0);
             targetTurretAngle = Math.atan2(11.5, 12)+Math.PI*90/180;
@@ -170,7 +170,7 @@ public class MainTeleOp2 extends OpMode{
             hand[currSide].setPosition(handPosFromAngle(Math.PI*180/180, Math.atan2(11.5, 12)+Math.PI*90/180));
         }
         if(gamepad2.y){
-            controlState = Gamepad2ControlState.PRESET;
+            controlState = ControlState.PRESET;
             targetSlideLength = 40;
             targetSlideVelocity = (537.7*312.0/60.0);
             targetTurretAngle = Math.PI*180/180;
@@ -187,10 +187,10 @@ public class MainTeleOp2 extends OpMode{
         }
 
         if(gamepad2.right_bumper) {
-            controlState = Gamepad2ControlState.MANUAL_CONTROL;
+            controlState = ControlState.MANUAL_CONTROL;
         }
 
-        if(controlState.equals(Gamepad2ControlState.GRAB)) {
+        if(controlState.equals(ControlState.GRAB)) {
             targetGroundDistance -= gamepad1.left_stick_y*gamepad1.left_stick_y*0.6*Math.signum(gamepad1.left_stick_y);
             targetGroundDistance = Math.max(targetGroundDistance, 6.0);
             targetGroundDistance = Math.min(targetGroundDistance, MAX_GROUND_DISTANCE[currSide]);
@@ -205,9 +205,9 @@ public class MainTeleOp2 extends OpMode{
 
             hand[currSide].setPosition(handPosFromAngle(Math.PI*270/180, targetTurretAngle));
         }
-        if(controlState.equals(Gamepad2ControlState.PRESET)){
+        if(controlState.equals(ControlState.PRESET)){
             if(gamepad2.left_stick_y != 0 || gamepad2.right_stick_y != 0){
-                controlState = Gamepad2ControlState.MANUAL_CONTROL;
+                controlState = ControlState.MANUAL_CONTROL;
             }
             else {
                 double currTargetSlideLength = targetSlideLength;
@@ -228,7 +228,7 @@ public class MainTeleOp2 extends OpMode{
                 slides[currSide].setLength(currTargetSlideLength, currTargetSlideVelocity);
             }
         }
-        if(controlState.equals(Gamepad2ControlState.MANUAL_CONTROL)){
+        if(controlState.equals(ControlState.MANUAL_CONTROL)){
             targetSlideLength = 10000 * -gamepad2.right_stick_y;
             targetSlideVelocity = slideCtv.targetSpeedFromJoysticks(-gamepad2.right_stick_y) * (537.7*312.0/60.0);
 
