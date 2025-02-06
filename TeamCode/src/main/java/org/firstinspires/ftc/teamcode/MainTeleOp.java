@@ -89,7 +89,7 @@ public class MainTeleOp extends OpMode{
         br = hardwareMap.get(DcMotorEx.class, "backRight");
 
         IMU imu = hardwareMap.get(IMU.class, "imu");
-        IMU.Parameters imuParameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
+        IMU.Parameters imuParameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         imu.initialize(imuParameters);
         fod = new Drive(fl, fr, bl, br, imu);
         fod.resetImu();
@@ -256,6 +256,9 @@ public class MainTeleOp extends OpMode{
         double yDrive = -gamepad1.left_stick_y * (gamepad1.right_trigger > 0.8 ? 0.5 : 1);
         double rotation = gamepad1.right_stick_x * (gamepad1.right_trigger > 0.8 ? 0.5 : 1);
         motorPowers = fod.driveFieldCentric(xDrive, yDrive, rotation);
+        telemetry.addData("xDrive", xDrive);
+        telemetry.addData("yDrive", yDrive);
+        telemetry.addData("rotation", rotation);
         telemetry.addData("fl", motorPowers[0]);
         telemetry.addData("fr", motorPowers[1]);
         telemetry.addData("bl", motorPowers[2]);
