@@ -145,7 +145,7 @@ public class MainTeleOp extends OpMode{
                     targetGroundDistance = 14.0;
                     clawGrabHeight = RobotConstants.MAX_GRAB_HEIGHT;
                     fingers.setPosition(RobotConstants.FINGER_OPEN_POS);
-                    wrist.setPosition(RobotConstants.WRIST_PERPEN_POS);
+                    wrist.setPosition(RobotConstants.WRIST_START_POS);
                 }
                 else{
                     controlState = ControlState.PRESET;
@@ -174,12 +174,12 @@ public class MainTeleOp extends OpMode{
             else {
                 controlState = ControlState.PRESET;
                 double currGroundDistance = Math.sin(turrets.getAngleRadians()) * slides.getLength();
-                targetTurretAngle = Math.atan2(currGroundDistance, RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - 13.0);
+                targetTurretAngle = Math.atan2(currGroundDistance, RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - (RobotConstants.MAX_GRAB_HEIGHT - 2));
                 presetAction = new SequentialAction(
-                        new DualTurretAction(turrets).setTargetAngleRadians(targetTurretAngle),
+                        new DualTurretAction(turrets).setTargetAngleRadians(targetTurretAngle).setMargin(Math.PI * 4 / 180),
                         new ParallelAction(
                             new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI*110/180, targetTurretAngle))),
-                            new SleepAction(0.5) //wait for servos to move
+                            new SleepAction(0.35) //wait for servos to move
                         ),
                         new ParallelAction(
                             new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, 10.5), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
@@ -250,7 +250,6 @@ public class MainTeleOp extends OpMode{
         }
 
         //Drive Controls
-        //TODO: test
         double[] motorPowers = new double[10];
         double xDrive = gamepad1.left_stick_x * (gamepad1.right_trigger > 0.8 ? 0.5 : 1);
         double yDrive = -gamepad1.left_stick_y * (gamepad1.right_trigger > 0.8 ? 0.5 : 1);
