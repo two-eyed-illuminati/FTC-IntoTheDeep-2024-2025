@@ -82,11 +82,15 @@ public class MainTeleOp extends OpMode{
         telemetry.update();
 
         fl = hardwareMap.get(DcMotorEx.class, "frontLeft");
+        fl.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         fl.setDirection(DcMotorEx.Direction.REVERSE);
         fr = hardwareMap.get(DcMotorEx.class, "frontRight");
+        fr.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         bl = hardwareMap.get(DcMotorEx.class, "backLeft");
+        bl.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         bl.setDirection(DcMotorEx.Direction.REVERSE);
         br = hardwareMap.get(DcMotorEx.class, "backRight");
+        br.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
         IMU imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters imuParameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
