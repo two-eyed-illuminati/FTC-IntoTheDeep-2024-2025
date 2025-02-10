@@ -289,15 +289,6 @@ public final class MecanumDrive {
                 t = Actions.now() - beginTs;
             }
 
-            if (t >= timeTrajectory.duration) {
-                leftFront.setPower(0);
-                leftBack.setPower(0);
-                rightBack.setPower(0);
-                rightFront.setPower(0);
-
-                return false;
-            }
-
             Pose2dDual<Time> txWorldTarget = timeTrajectory.get(t);
             targetPoseWriter.write(new PoseMessage(txWorldTarget.value()));
 
@@ -350,6 +341,16 @@ public final class MecanumDrive {
             c.setStroke("#4CAF50FF");
             c.setStrokeWidth(1);
             c.strokePolyline(xPoints, yPoints);
+
+            if ((t >= timeTrajectory.duration && error.position.norm() < 1 && robotVelRobot.linearVel.norm() < 0.5
+                    && error.heading.toDouble() < Math.toRadians(5)) || t >= timeTrajectory.duration + 1) {
+                leftFront.setPower(0);
+                leftBack.setPower(0);
+                rightBack.setPower(0);
+                rightFront.setPower(0);
+
+                return false;
+            }
 
             return true;
         }

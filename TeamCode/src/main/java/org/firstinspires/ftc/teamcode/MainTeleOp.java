@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import androidx.annotation.NonNull;
-
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
@@ -21,6 +19,7 @@ import org.firstinspires.ftc.teamcode.utils.ControlsToValues;
 import org.firstinspires.ftc.teamcode.utils.Drive;
 import org.firstinspires.ftc.teamcode.utils.DualSlide;
 import org.firstinspires.ftc.teamcode.utils.DualSlideSetLength;
+import org.firstinspires.ftc.teamcode.utils.DualSlideSetLengthWithLimit;
 import org.firstinspires.ftc.teamcode.utils.DualTurret;
 import org.firstinspires.ftc.teamcode.utils.DualTurretAction;
 import org.firstinspires.ftc.teamcode.utils.RobotConstants;
@@ -34,31 +33,6 @@ enum ControlState {
 
 @TeleOp
 public class MainTeleOp extends OpMode{
-    class DualSlideSetLengthWithLimit implements Action {
-        DualSlideSetLength setLength;
-        DualTurret turrets;
-        double maxGroundDistance;
-        public DualSlideSetLengthWithLimit(DualSlideSetLength setLength, DualTurret turrets, double maxGroundDistance){
-            this.setLength = setLength;
-            this.turrets = turrets;
-            this.maxGroundDistance = maxGroundDistance;
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket packet){
-            double futureGroundDistance = Math.sin(turrets.getAngleRadians()) * setLength.targetLengthInches;
-            if(futureGroundDistance > maxGroundDistance){
-                double originalTarget = setLength.targetLengthInches;
-                setLength.targetLengthInches = maxGroundDistance / Math.sin(turrets.getAngleRadians());
-                setLength.run(packet);
-                setLength.targetLengthInches = originalTarget;
-                return setLength.stillRunning();
-            }
-            else{
-                return setLength.run(packet);
-            }
-        }
-    }
     Drive fod;
     DualTurret turrets; DualSlide slides;
     ControlsToValues slideCtv = new ControlsToValues();
