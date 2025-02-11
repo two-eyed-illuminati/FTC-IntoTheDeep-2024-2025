@@ -60,7 +60,7 @@ public class AutoRedLeftTest extends LinearOpMode {
         );
         return presetAction;
     }
-    public Action getSamplePreset(){
+    public Action getSamplePreset(boolean isSample3){
         double targetGroundDistance = 15;
 
         double clawGrabHeight = AutoTunables.SAMPLE_GRAB_HEIGHT;
@@ -73,14 +73,14 @@ public class AutoRedLeftTest extends LinearOpMode {
           new DualSlideSetLength(slides, targetSlideLength),
           new InstantAction(() -> {
               fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS);
-              wrist.setPosition(RobotConstants.WRIST_PERPEN_POS);
+              wrist.setPosition(isSample3 ? RobotConstants.WRIST_START_POS : RobotConstants.WRIST_PERPEN_POS);
               hand.setPosition(handPosFromAngle(Math.PI*270/180, targetTurretAngle));
           })
         );
 
         return presetAction;
     }
-    public Action prepGetSamplePreset(){
+    public Action prepGetSamplePreset(boolean isSample3){
         double targetGroundDistance = 15;
 
         double clawGrabHeight = RobotConstants.MAX_GRAB_HEIGHT;
@@ -92,8 +92,7 @@ public class AutoRedLeftTest extends LinearOpMode {
                 new DualTurretAction(turrets).setTargetAngleRadians(targetTurretAngle),
                 new DualSlideSetLength(slides, targetSlideLength),
                 new InstantAction(() -> {
-                    fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS);
-                    wrist.setPosition(RobotConstants.WRIST_PERPEN_POS);
+                    wrist.setPosition(isSample3 ? RobotConstants.WRIST_START_POS : RobotConstants.WRIST_PERPEN_POS);
                     hand.setPosition(handPosFromAngle(Math.PI*270/180, targetTurretAngle));
                 })
         );
@@ -112,9 +111,9 @@ public class AutoRedLeftTest extends LinearOpMode {
         );
         return presetAction;
     }
-    public Action getSampleAction(){
+    public Action getSampleAction(boolean isSample3){
         return new SequentialAction(
-                getSamplePreset(),
+                getSamplePreset(isSample3),
                 new SleepAction(AutoTunables.WAIT_TIME),
                 new InstantAction(() -> {fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);}),
                 new SleepAction(AutoTunables.WAIT_TIME)
@@ -180,7 +179,8 @@ public class AutoRedLeftTest extends LinearOpMode {
                 .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_FORWARD+19, AutoTunables.SAMPLE_SIDEWAYS, Math.toRadians(90)), Math.toRadians(0))
                 .lineToY(AutoTunables.SAMPLE_SIDEWAYS+10);
         TrajectoryActionBuilder moveToBasket3 = goToSample3FromBasket.endTrajectory().fresh()
-                .setTangent(Math.toRadians(180))
+                .setTangent(Math.toRadians(-90))
+                .lineToY(AutoTunables.SAMPLE_SIDEWAYS)
                 .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
         TrajectoryActionBuilder end = moveToBasket3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
@@ -206,7 +206,7 @@ public class AutoRedLeftTest extends LinearOpMode {
                         )
                 ),
                 //Sample #1
-                getSampleAction(),
+                getSampleAction(false),
                 new ParallelAction(
                         basketPreset(),
                         new InstantAction(() -> {hand.setPosition(RobotConstants.HAND_START_POS);}),
@@ -221,10 +221,11 @@ public class AutoRedLeftTest extends LinearOpMode {
                         goToSample2FromBasket.build(),
                         new SequentialAction(
                                 new SleepAction(AutoTunables.WAIT_TIME),
-                                resetPreset()
+                                resetPreset(),
+                                prepGetSamplePreset(false)
                         )
                 ),
-                getSampleAction(),
+                getSampleAction(false),
                 new ParallelAction(
                         basketPreset(),
                         new InstantAction(() -> {hand.setPosition(RobotConstants.HAND_START_POS);}),
@@ -240,7 +241,29 @@ public class AutoRedLeftTest extends LinearOpMode {
                         new SequentialAction(
                                 new SleepAction(AutoTunables.WAIT_TIME),
                                 resetPreset(),
-                                prepGetSamplePreset()
+                                prepGetSamplePreset(true)
+                        )
+                ),
+                getSampleAction(true),
+                new ParallelAction(
+                        new SequentialAction(
+                                prepGetSamplePreset(true),
+                                new SleepAction(AutoTunables.WAIT_TIME),
+                                new ParallelAction(
+                                        basketPreset(),
+                                        new InstantAction(() -> {hand.setPosition(RobotConstants.HAND_START_POS);})
+                                )
+                        ),
+                        new SequentialAction(
+                                moveToBasket3.build()
+                        )
+                ),
+                highBucketScoreAction(),
+                new ParallelAction(
+                        end.build(),
+                        new SequentialAction(
+                                new SleepAction(AutoTunables.WAIT_TIME),
+                                resetPreset()
                         )
                 )
         ));
