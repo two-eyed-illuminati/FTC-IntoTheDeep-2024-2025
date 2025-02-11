@@ -56,11 +56,7 @@ public class AutoRedLeftTest extends LinearOpMode {
                     wrist.setPosition(RobotConstants.WRIST_PERPEN_POS);
                 }),
                 new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, 36), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
-                new SequentialAction(
-                        new DualTurretAction(turrets).setMode(DualTurretAction.Mode.GO_ABOVE).setTargetAngleRadians(Math.PI*110/180),
-                        new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI * 145 / 180, Math.PI * 155 / 180))),
-                        new DualTurretAction(turrets).setTargetAngleRadians(Math.PI*155/180)
-                )
+                new DualTurretAction(turrets).setTargetAngleRadians(Math.PI*155/180)
         );
         return presetAction;
     }
@@ -96,6 +92,14 @@ public class AutoRedLeftTest extends LinearOpMode {
         );
         return presetAction;
     }
+    public Action getSampleAction(){
+        return new SequentialAction(
+                getSamplePreset(),
+                new SleepAction(AutoTunables.WAIT_TIME),
+                new InstantAction(() -> {fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);}),
+                new SleepAction(AutoTunables.WAIT_TIME)
+        );
+    }
     @Override
     public void runOpMode(){
         MultipleTelemetry multTele = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -128,25 +132,10 @@ public class AutoRedLeftTest extends LinearOpMode {
                         new DualSlideSetLength(slides, Math.sqrt(Math.pow(AutoTunables.SPECIMEN_END_HEIGHT, 2) + Math.pow(12, 2)), AutoTunables.SPECIMEN_DOWN_SLIDE_SPEED_MULTI*384.5*435.0/60.0)
                 ),
                 new InstantAction(() -> {fingers.setPosition(RobotConstants.FINGER_OPEN_POS);}),
-                new SleepAction(AutoTunables.WAIT_TIME),
-                new ParallelAction(
-                        new InstantAction(() -> {hand.setPosition(RobotConstants.HAND_START_POS);}),
-                        new DualSlideSetLength(slides, 10.5),
-                        new DualTurretAction(turrets).setTargetAngleRadians(Math.PI * 60 / 180)
-                ),
-                new InstantAction(() -> {
-                    fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
-                    wrist.setPosition(RobotConstants.WRIST_START_POS);
-                })
+                new SleepAction(AutoTunables.WAIT_TIME)
         );
         TrajectoryActionBuilder moveToSamples = forward.endTrajectory().fresh().
                 setTangent(Math.toRadians(90)).splineToConstantHeading(new Vector2d(AutoTunables.SAMPLE_FORWARD, AutoTunables.SAMPLE_SIDEWAYS), 0);
-        Action getSample = new SequentialAction(
-                getSamplePreset(),
-                new SleepAction(AutoTunables.WAIT_TIME),
-                new InstantAction(() -> {fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);}),
-                new SleepAction(AutoTunables.WAIT_TIME)
-        );
         TrajectoryActionBuilder moveToBasket = moveToSamples.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
                 .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
@@ -159,20 +148,44 @@ public class AutoRedLeftTest extends LinearOpMode {
         TrajectoryActionBuilder end = moveToBasket2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
                 .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_FORWARD, AutoTunables.SAMPLE_SIDEWAYS, Math.toRadians(0)), Math.toRadians(0));
+        TrajectoryActionBuilder goToSample3FromBasket = moveToBasket2.endTrajectory().fresh()
+                .setTangent(Math.toRadians(0))
+                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_FORWARD+10, AutoTunables.SAMPLE_SIDEWAYS+10, Math.toRadians(90)), Math.toRadians(0));
+        TrajectoryActionBuilder moveToBasket3 = goToSample3FromBasket.endTrajectory().fresh()
+                .setTangent(Math.toRadians(180))
+                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
 
         Actions.runBlocking(new SequentialAction(
                 scoreSpecimen,
-                moveToSamples.build(),
-                getSample,
+                new ParallelAction(
+                        new InstantAction(() -> {hand.setPosition(RobotConstants.HAND_START_POS);}),
+                        new DualSlideSetLength(slides, 10.5),
+                        new DualTurretAction(turrets).setTargetAngleRadians(Math.PI * 60 / 180),
+                        new SequentialAction(
+                            new SleepAction(AutoTunables.WAIT_TIME),
+                            new ParallelAction(
+                                moveToSamples.build(),
+                                new InstantAction(() -> {
+                                    fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
+                                    wrist.setPosition(RobotConstants.WRIST_START_POS);
+                                })
+                            )
+                        )
+                ),
+                getSampleAction(),
                 new ParallelAction(
                         basketPreset(),
+                        new InstantAction(() -> {hand.setPosition(RobotConstants.HAND_START_POS);}),
                         new SequentialAction(
                                 new SleepAction(AutoTunables.WAIT_TIME*2),
                                 moveToBasket.build()
                         )
                 ),
-                new SleepAction(AutoTunables.WAIT_TIME),
+                new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI * 145 / 180, Math.PI * 155 / 180))),
+                new SleepAction(AutoTunables.WAIT_TIME*2),
                 new InstantAction(() -> {fingers.setPosition(RobotConstants.FINGER_OPEN_POS);}),
+                new SleepAction(AutoTunables.WAIT_TIME),
+                new InstantAction(() -> {hand.setPosition(RobotConstants.HAND_START_POS);}),
                 new SleepAction(AutoTunables.WAIT_TIME),
                 new ParallelAction(
                         goToSample2FromBasket.build(),
@@ -181,13 +194,23 @@ public class AutoRedLeftTest extends LinearOpMode {
                                 resetPreset()
                         )
                 ),
-                getSample,
-                moveToBasket2.build(),
-                new SleepAction(AutoTunables.WAIT_TIME),
+                getSampleAction(),
+                new ParallelAction(
+                        basketPreset(),
+                        new InstantAction(() -> {hand.setPosition(RobotConstants.HAND_START_POS);}),
+                        new SequentialAction(
+                                new SleepAction(AutoTunables.WAIT_TIME*2),
+                                moveToBasket2.build()
+                        )
+                ),
+                new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI * 145 / 180, Math.PI * 155 / 180))),
+                new SleepAction(AutoTunables.WAIT_TIME*2),
                 new InstantAction(() -> {fingers.setPosition(RobotConstants.FINGER_OPEN_POS);}),
                 new SleepAction(AutoTunables.WAIT_TIME),
+                new InstantAction(() -> {hand.setPosition(RobotConstants.HAND_START_POS);}),
+                new SleepAction(AutoTunables.WAIT_TIME),
                 new ParallelAction(
-                        goToSample2FromBasket.build(),
+                        end.build(),
                         new SequentialAction(
                                 new SleepAction(AutoTunables.WAIT_TIME),
                                 resetPreset()

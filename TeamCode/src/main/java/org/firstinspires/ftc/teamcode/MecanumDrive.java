@@ -79,8 +79,8 @@ public final class MecanumDrive {
         public double maxAngAccel = Math.PI;
 
         // path controller gains
-        public double axialGain = 2.0;
-        public double lateralGain = 2.0;
+        public double axialGain = 6.0;
+        public double lateralGain = 6.0;
         public double headingGain = 6.0; // shared with turn
 
         public double axialVelGain = 0.0;
@@ -342,8 +342,8 @@ public final class MecanumDrive {
             c.setStrokeWidth(1);
             c.strokePolyline(xPoints, yPoints);
 
-            if ((t >= timeTrajectory.duration && error.position.norm() < 1 && robotVelRobot.linearVel.norm() < 0.5
-                    && error.heading.toDouble() < Math.toRadians(5)) || t >= timeTrajectory.duration + 1) {
+            if ((t >= timeTrajectory.duration && error.position.norm() < 0.5 && robotVelRobot.linearVel.norm() < 0.5
+                    && error.heading.toDouble() < Math.toRadians(5)) || t >= timeTrajectory.duration + 3) {
                 leftFront.setPower(0);
                 leftBack.setPower(0);
                 rightBack.setPower(0);

@@ -34,7 +34,7 @@ public class DualSlide {
 
         slideMotor1.setTargetPosition((int) pulses);
         slideMotor2.setTargetPosition((int) pulses);
-        maxVelocity = Math.min(maxVelocity, 0.9*384.5*435.0/60.0);
+        maxVelocity = Math.min(maxVelocity, 384.5*435.0/60.0);
         double m1Error = Math.abs(pulses - slideMotor1.getCurrentPosition());
         double m2Error = Math.abs(pulses - slideMotor2.getCurrentPosition());
 
