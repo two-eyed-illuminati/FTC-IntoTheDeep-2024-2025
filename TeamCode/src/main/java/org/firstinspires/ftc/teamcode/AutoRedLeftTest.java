@@ -177,7 +177,8 @@ public class AutoRedLeftTest extends LinearOpMode {
                 .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
         TrajectoryActionBuilder goToSample3FromBasket = moveToBasket2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
-                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_FORWARD+10, AutoTunables.SAMPLE_SIDEWAYS+10, Math.toRadians(90)), Math.toRadians(0));
+                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_FORWARD+19, AutoTunables.SAMPLE_SIDEWAYS, Math.toRadians(90)), Math.toRadians(0))
+                .lineToY(AutoTunables.SAMPLE_SIDEWAYS+10);
         TrajectoryActionBuilder moveToBasket3 = goToSample3FromBasket.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
                 .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
@@ -238,7 +239,8 @@ public class AutoRedLeftTest extends LinearOpMode {
                         goToSample3FromBasket.build(),
                         new SequentialAction(
                                 new SleepAction(AutoTunables.WAIT_TIME),
-                                resetPreset()
+                                resetPreset(),
+                                prepGetSamplePreset()
                         )
                 )
         ));
