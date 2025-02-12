@@ -177,6 +177,7 @@ public class AutoRedLeftTest extends LinearOpMode {
         TrajectoryActionBuilder goToSample3FromBasket = moveToBasket2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
                 .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_FORWARD+19, AutoTunables.SAMPLE_SIDEWAYS, Math.toRadians(90)), Math.toRadians(0))
+                .setTangent(Math.toRadians(90))
                 .lineToY(AutoTunables.SAMPLE_SIDEWAYS+10);
         TrajectoryActionBuilder moveToBasket3 = goToSample3FromBasket.endTrajectory().fresh()
                 .setTangent(Math.toRadians(-90))
