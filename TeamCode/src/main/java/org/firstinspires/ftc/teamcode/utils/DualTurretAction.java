@@ -45,6 +45,8 @@ public class DualTurretAction implements Action {
 
     @Override
     public boolean run(@NonNull TelemetryPacket packet) {
+        packet.put("turrAngle", turret.getAngleDegrees());
+        packet.put("turrAngleErr", Math.toDegrees(Math.abs(turret.getAngleRadians() - targetAngleRadians)));
         if(mode.equals(Mode.GO_TO)) {
             turret.setAngleRadians(targetAngleRadians, maxVelocity);
             return Math.abs(turret.getAngleRadians() - targetAngleRadians) > margin;

@@ -23,6 +23,8 @@ public class DualSlideSetLengthWithLimit implements Action {
     public boolean run(@NonNull TelemetryPacket packet) {
         double futureGroundDistance = Math.sin(turrets.getAngleRadians()) * setLength.targetLengthInches;
         if (futureGroundDistance > maxGroundDistance) {
+            packet.put("len", setLength.slides.getLength());
+            packet.put("lenErr", Math.abs(setLength.slides.getLength() - setLength.targetLengthInches));
             double originalTarget = setLength.targetLengthInches;
             setLength.targetLengthInches = maxGroundDistance / Math.sin(turrets.getAngleRadians());
             setLength.run(packet);
