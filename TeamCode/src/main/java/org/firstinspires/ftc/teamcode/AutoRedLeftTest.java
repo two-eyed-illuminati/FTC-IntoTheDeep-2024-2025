@@ -139,7 +139,7 @@ public class AutoRedLeftTest extends LinearOpMode {
         return new SequentialAction(
                 new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI * 145 / 180, Math.PI * 155 / 180))),
                 new SleepAction(AutoTunables.WAIT_TIME),
-                new InstantAction(() -> {fingers.setPosition(RobotConstants.FINGER_OPEN_POS);}),
+                new InstantAction(() -> {fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS);}),
                 new SleepAction(AutoTunables.WAIT_TIME),
                 new InstantAction(() -> {hand.setPosition(RobotConstants.HAND_START_POS);}),
                 new SleepAction(AutoTunables.WAIT_TIME)
@@ -199,7 +199,8 @@ public class AutoRedLeftTest extends LinearOpMode {
                 .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
         TrajectoryActionBuilder end = moveToBasket3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
-                .splineToLinearHeading(new Pose2d(AutoTunables.END_X, AutoTunables.END_Y, Math.toRadians(-90)), Math.toRadians(0));
+                .splineToSplineHeading(new Pose2d(AutoTunables.END_X, AutoTunables.SAMPLE_3_Y, Math.toRadians(-90)), Math.toRadians(-90))
+                .splineToSplineHeading(new Pose2d(AutoTunables.END_X, AutoTunables.END_Y, Math.toRadians(-90)), Math.toRadians(-90));
 
         Actions.runBlocking(new SequentialAction(
                 //Score preload specimen
@@ -324,6 +325,10 @@ public class AutoRedLeftTest extends LinearOpMode {
                         new SequentialAction(
                                 new SleepAction(AutoTunables.WAIT_TIME),
                                 resetPreset()
+//                                new ParallelAction(
+//                                        new DualTurretAction(turrets).setTargetAngleRadians(Math.atan2(AutoTunables.SPECIMEN_START_HEIGHT, 14) + Math.PI * 90 / 180),
+//                                        new DualSlideSetLength(slides, Math.sqrt(Math.pow(AutoTunables.SPECIMEN_START_HEIGHT, 2) + Math.pow(10, 2)))
+//                                )
                         )
                 )
         ));
