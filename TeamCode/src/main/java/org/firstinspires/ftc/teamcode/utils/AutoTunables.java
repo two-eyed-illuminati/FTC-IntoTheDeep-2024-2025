@@ -18,5 +18,5 @@ public class AutoTunables {
     public static double SPECIMEN_FORWARD = 18;
     public static double SPECIMEN_FORWARD_SPEED = 0.5;
     public static double SPECIMEN_START_HEIGHT = 18;
-    public static double WAIT_TIME = 0.35;
+    public static double WAIT_TIME = 0.5;
 }

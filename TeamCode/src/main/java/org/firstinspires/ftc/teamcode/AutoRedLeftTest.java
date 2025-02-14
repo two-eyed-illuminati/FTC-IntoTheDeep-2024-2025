@@ -187,12 +187,13 @@ public class AutoRedLeftTest extends LinearOpMode {
         TrajectoryActionBuilder moveToBasket2 = goToSample2FromBasket.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
                 .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
-        TrajectoryActionBuilder goToSample3FromBasket = moveToBasket2.endTrajectory().fresh()
+        TrajectoryActionBuilder goToSample3FromBasketPart1 = moveToBasket2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
-                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_3_X, AutoTunables.SAMPLE_Y, Math.toRadians(90)), Math.toRadians(0))
+                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_3_X, AutoTunables.SAMPLE_Y, Math.toRadians(90)), Math.toRadians(0));
+        TrajectoryActionBuilder goToSample3FromBasketPart2 = goToSample3FromBasketPart1.endTrajectory().fresh()
                 .setTangent(Math.toRadians(90))
                 .lineToY(AutoTunables.SAMPLE_3_Y);
-        TrajectoryActionBuilder moveToBasket3 = goToSample3FromBasket.endTrajectory().fresh()
+        TrajectoryActionBuilder moveToBasket3 = goToSample3FromBasketPart2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(-90))
                 .lineToY(AutoTunables.SAMPLE_Y)
                 .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
@@ -281,7 +282,11 @@ public class AutoRedLeftTest extends LinearOpMode {
                     FtcDashboard.getInstance().sendTelemetryPacket(p);
                 }),
                 new ParallelAction(
-                        goToSample3FromBasket.build(),
+                        new SequentialAction(
+                                goToSample3FromBasketPart1.build(),
+                                new SleepAction(AutoTunables.WAIT_TIME),
+                                goToSample3FromBasketPart2.build()
+                        ),
                         new SequentialAction(
                                 new SleepAction(AutoTunables.WAIT_TIME),
                                 resetPreset(),
@@ -306,9 +311,7 @@ public class AutoRedLeftTest extends LinearOpMode {
                                         basketPreset()
                                 )
                         ),
-                        new SequentialAction(
-                                moveToBasket3.build()
-                        )
+                        moveToBasket3.build()
                 ),
                 highBucketScoreAction(),
                 new InstantAction(() -> {
