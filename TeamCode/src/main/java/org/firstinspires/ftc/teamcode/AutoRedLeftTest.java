@@ -13,9 +13,11 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.utils.AutoTunables;
@@ -25,6 +27,7 @@ import org.firstinspires.ftc.teamcode.utils.DualSlideSetLengthWithLimit;
 import org.firstinspires.ftc.teamcode.utils.DualTurret;
 import org.firstinspires.ftc.teamcode.utils.DualTurretAction;
 import org.firstinspires.ftc.teamcode.utils.RobotConstants;
+import org.firstinspires.ftc.teamcode.utils.Transfer;
 
 @Autonomous
 public class AutoRedLeftTest extends LinearOpMode {
@@ -150,6 +153,10 @@ public class AutoRedLeftTest extends LinearOpMode {
         MultipleTelemetry multTele = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         Pose2d initialPose = new Pose2d(0, 0, 0);
         drive = new MecanumDrive(hardwareMap, initialPose);
+
+        IMU imu = hardwareMap.get(IMU.class, "imu");
+        IMU.Parameters imuParameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
+        imu.initialize(imuParameters);
 
         DcMotorEx turretLeftMotor = hardwareMap.get(DcMotorEx.class, "turretLeft"); turretLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
         DcMotorEx turretRightMotor = hardwareMap.get(DcMotorEx.class, "turretRight");
@@ -335,5 +342,9 @@ public class AutoRedLeftTest extends LinearOpMode {
         TelemetryPacket p = new TelemetryPacket();
         p.put("State", 8);
         FtcDashboard.getInstance().sendTelemetryPacket(p);
+
+        Transfer.dualSlides = slides;
+        Transfer.dualTurrets = turrets;
+        Transfer.imu = imu;
     }
 }
