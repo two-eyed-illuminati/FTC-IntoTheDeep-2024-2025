@@ -186,7 +186,18 @@ public class AutoRedLeftTest extends LinearOpMode {
         Action scoreSpecimen = new SequentialAction(
                 new ParallelAction(
                         specimenPreset(),
-                        new SequentialAction(new SleepAction(AutoTunables.WAIT_TIME), forward.build())
+                        new SequentialAction(
+                                new SleepAction(AutoTunables.WAIT_TIME),
+                                new InstantAction(() -> {
+                                    drive.maxCorrectionTime = 3;
+                                    drive.correctionMargin = 0.25;
+                                }),
+                                forward.build(),
+                                new InstantAction(() -> {
+                                    drive.maxCorrectionTime = 0.5;
+                                    drive.correctionMargin = 0.5;
+                                })
+                        )
                 ),
                 new SleepAction(AutoTunables.WAIT_TIME),
                 speciDown(),
@@ -260,9 +271,7 @@ public class AutoRedLeftTest extends LinearOpMode {
                         new InstantAction(() -> {hand.setPosition(handPosFromAngle(Math.PI*90/180, Math.PI*155/180));}),
                         new SequentialAction(
                                 new SleepAction(AutoTunables.WAIT_TIME*2),
-                                new InstantAction(() -> {drive.maxCorrectionTime = 0.4;}),
-                                moveToBasket.build(),
-                                new InstantAction(() -> {drive.maxCorrectionTime = 3;})
+                                moveToBasket.build()
                         )
                 ),
                 highBucketScoreAction(),
@@ -291,9 +300,7 @@ public class AutoRedLeftTest extends LinearOpMode {
                         new InstantAction(() -> {hand.setPosition(handPosFromAngle(Math.PI*90/180, Math.PI*155/180));}),
                         new SequentialAction(
                                 new SleepAction(AutoTunables.WAIT_TIME*2),
-                                new InstantAction(() -> {drive.maxCorrectionTime = 0.4;}),
-                                moveToBasket2.build(),
-                                new InstantAction(() -> {drive.maxCorrectionTime = 3;})
+                                moveToBasket2.build()
                         )
                 ),
                 highBucketScoreAction(),
@@ -333,9 +340,7 @@ public class AutoRedLeftTest extends LinearOpMode {
                                         basketPreset()
                                 )
                         ),
-                        new InstantAction(() -> {drive.maxCorrectionTime = 0.4;}),
-                        moveToBasket3.build(),
-                        new InstantAction(() -> {drive.maxCorrectionTime = 3;})
+                        moveToBasket3.build()
                 ),
                 highBucketScoreAction(),
                 new InstantAction(() -> {
