@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.utils.ControlsToValues;
 import org.firstinspires.ftc.teamcode.utils.Drive;
 import org.firstinspires.ftc.teamcode.utils.DualSlide;
@@ -72,35 +73,26 @@ public class MainTeleOp extends OpMode{
             imu = hardwareMap.get(IMU.class, "imu");
             IMU.Parameters imuParameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
             imu.initialize(imuParameters);
+            fod = new Drive(fl, fr, bl, br, imu);
+            fod.resetImu();
         }
         else {
             imu = Transfer.imu;
             Transfer.imu = null;
-        }
-        fod = new Drive(fl, fr, bl, br, imu);
-        fod.resetImu();
-
-        if(Transfer.dualTurrets == null) {
-            DcMotorEx turretLeftMotor = hardwareMap.get(DcMotorEx.class, "turretLeft");
-            turretLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
-            DcMotorEx turretRightMotor = hardwareMap.get(DcMotorEx.class, "turretRight");
-            turrets = new DualTurret(turretLeftMotor, turretRightMotor);
-        }
-        else{
-            turrets = Transfer.dualTurrets;
-            Transfer.dualTurrets = null;
+            telemetry.addLine("Found transferred imu");
+            telemetry.addData("Angle:", -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            fod = new Drive(fl, fr, bl, br, imu);
         }
 
-        if(Transfer.dualSlides == null) {
-            DcMotorEx slideLeftMotor = hardwareMap.get(DcMotorEx.class, "liftLeft");
-            slideLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
-            DcMotorEx slideRightMotor = hardwareMap.get(DcMotorEx.class, "liftRight");
-            slides = new DualSlide(slideLeftMotor, slideRightMotor);
-        }
-        else{
-            slides = Transfer.dualSlides;
-            Transfer.dualSlides = null;
-        }
+        DcMotorEx turretLeftMotor = hardwareMap.get(DcMotorEx.class, "turretLeft");
+        turretLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        DcMotorEx turretRightMotor = hardwareMap.get(DcMotorEx.class, "turretRight");
+        turrets = new DualTurret(turretLeftMotor, turretRightMotor);
+
+        DcMotorEx slideLeftMotor = hardwareMap.get(DcMotorEx.class, "liftLeft");
+        slideLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        DcMotorEx slideRightMotor = hardwareMap.get(DcMotorEx.class, "liftRight");
+        slides = new DualSlide(slideLeftMotor, slideRightMotor);
 
         slideCtv.cubicLowerSpeedValue = 0.2;
 

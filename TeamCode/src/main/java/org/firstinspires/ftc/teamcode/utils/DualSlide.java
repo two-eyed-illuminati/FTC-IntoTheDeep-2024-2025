@@ -30,7 +30,7 @@ public class DualSlide {
     public void setLength(double lengthInches, double maxVelocity) {
         double pulses = PULSES_PER_INCH * (lengthInches - COLLAPSED_LENGTH);
         pulses = Math.min(pulses, MAX_PULSES);
-        pulses = Math.max(pulses, 50);
+        pulses = Math.max(pulses, 0);
 
         slideMotor1.setTargetPosition((int) pulses);
         slideMotor2.setTargetPosition((int) pulses);

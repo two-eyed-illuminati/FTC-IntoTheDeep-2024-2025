@@ -20,6 +20,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.utils.AutoTunables;
 import org.firstinspires.ftc.teamcode.utils.DualSlide;
 import org.firstinspires.ftc.teamcode.utils.DualSlideSetLength;
@@ -170,6 +171,15 @@ public class AutoRedLeftTest extends LinearOpMode {
         hand = hardwareMap.get(Servo.class, "hand"); hand.setPosition(RobotConstants.HAND_START_POS);
         wrist = hardwareMap.get(Servo.class, "wrist"); wrist.setPosition(RobotConstants.WRIST_START_POS);
 
+        Transfer.dualSlides = slides;
+        Transfer.dualTurrets = turrets;
+        Transfer.imu = imu;
+
+        telemetry.addData("Slide Length", slides.getLength());
+        telemetry.addData("Turret Angle", turrets.getAngleDegrees());
+        telemetry.addData("IMU Angle", -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+        telemetry.update();
+
         waitForStart();
 
         TrajectoryActionBuilder forward = drive.actionBuilder(initialPose).lineToX(AutoTunables.SPECIMEN_FORWARD, new TranslationalVelConstraint(AutoTunables.SPECIMEN_FORWARD_SPEED*50));
@@ -250,7 +260,9 @@ public class AutoRedLeftTest extends LinearOpMode {
                         new InstantAction(() -> {hand.setPosition(handPosFromAngle(Math.PI*90/180, Math.PI*155/180));}),
                         new SequentialAction(
                                 new SleepAction(AutoTunables.WAIT_TIME*2),
-                                moveToBasket.build()
+                                new InstantAction(() -> {drive.maxCorrectionTime = 0.4;}),
+                                moveToBasket.build(),
+                                new InstantAction(() -> {drive.maxCorrectionTime = 3;})
                         )
                 ),
                 highBucketScoreAction(),
@@ -279,7 +291,9 @@ public class AutoRedLeftTest extends LinearOpMode {
                         new InstantAction(() -> {hand.setPosition(handPosFromAngle(Math.PI*90/180, Math.PI*155/180));}),
                         new SequentialAction(
                                 new SleepAction(AutoTunables.WAIT_TIME*2),
-                                moveToBasket2.build()
+                                new InstantAction(() -> {drive.maxCorrectionTime = 0.4;}),
+                                moveToBasket2.build(),
+                                new InstantAction(() -> {drive.maxCorrectionTime = 3;})
                         )
                 ),
                 highBucketScoreAction(),
@@ -319,7 +333,9 @@ public class AutoRedLeftTest extends LinearOpMode {
                                         basketPreset()
                                 )
                         ),
-                        moveToBasket3.build()
+                        new InstantAction(() -> {drive.maxCorrectionTime = 0.4;}),
+                        moveToBasket3.build(),
+                        new InstantAction(() -> {drive.maxCorrectionTime = 3;})
                 ),
                 highBucketScoreAction(),
                 new InstantAction(() -> {
@@ -331,7 +347,8 @@ public class AutoRedLeftTest extends LinearOpMode {
                         end.build(),
                         new SequentialAction(
                                 new SleepAction(AutoTunables.WAIT_TIME),
-                                resetPreset()
+                                resetPreset(),
+                                new DualSlideSetLength(slides, 10)
 //                                new ParallelAction(
 //                                        new DualTurretAction(turrets).setTargetAngleRadians(Math.atan2(AutoTunables.SPECIMEN_START_HEIGHT, 14) + Math.PI * 90 / 180),
 //                                        new DualSlideSetLength(slides, Math.sqrt(Math.pow(AutoTunables.SPECIMEN_START_HEIGHT, 2) + Math.pow(10, 2)))
@@ -342,9 +359,5 @@ public class AutoRedLeftTest extends LinearOpMode {
         TelemetryPacket p = new TelemetryPacket();
         p.put("State", 8);
         FtcDashboard.getInstance().sendTelemetryPacket(p);
-
-        Transfer.dualSlides = slides;
-        Transfer.dualTurrets = turrets;
-        Transfer.imu = imu;
     }
 }

@@ -258,6 +258,8 @@ public final class MecanumDrive {
         rightFront.setPower(wheelVels.rightFront.get(0) / maxPowerMag);
     }
 
+    public double maxCorrectionTime;
+
     public final class FollowTrajectoryAction implements Action {
         public final TimeTrajectory timeTrajectory;
         private double beginTs = -1;
@@ -343,7 +345,7 @@ public final class MecanumDrive {
             c.strokePolyline(xPoints, yPoints);
 
             if ((t >= timeTrajectory.duration && error.position.norm() < 0.5 && robotVelRobot.linearVel.norm() < 0.5
-                    && error.heading.toDouble() < Math.toRadians(5)) || t >= timeTrajectory.duration + 3) {
+                    && error.heading.toDouble() < Math.toRadians(5)) || t >= timeTrajectory.duration + maxCorrectionTime) {
                 leftFront.setPower(0);
                 leftBack.setPower(0);
                 rightBack.setPower(0);
