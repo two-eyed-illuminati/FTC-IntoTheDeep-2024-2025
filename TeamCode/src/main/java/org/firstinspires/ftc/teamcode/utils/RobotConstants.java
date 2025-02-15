@@ -12,8 +12,8 @@ public class RobotConstants {
     public static double MIN_GROUND_HEIGHT = 5;
     public static double MIN_GRAB_HEIGHT = 9.2;
     public static double MAX_GRAB_HEIGHT = 12.6;
-    public static double FINGER_CLOSE_POS = 0.3;
-    public static double FINGER_OPEN_POS = 0.44;
+    public static double FINGER_CLOSE_POS = 0.55;
+    public static double FINGER_OPEN_POS = 0.85;
     public static double HAND_START_POS = 0.0894;
     public static double HAND_PARALLEL_POS = 0.6394; //Pos where hand is parallel with slides
     public static double HAND_START_ANGLE = Math.PI*15.0/180.0; //Acute angle between hand start and slides

@@ -22,7 +22,7 @@ public class TestDualTurret extends OpMode {
         turretLeft = hardwareMap.get(DcMotorEx.class, "turretLeft");
         turretLeft.setDirection(DcMotorEx.Direction.REVERSE);
         turretRight = hardwareMap.get(DcMotorEx.class, "turretRight");
-        turrets = new DualTurret(turretLeft, turretRight);
+        turrets = new DualTurret(turretLeft, turretRight, true);
 //        turretLeft = new Turret(hardwareMap.get(DcMotorEx.class, "liftLeft"));
 //        turretRight = new Turret(hardwareMap.get(DcMotorEx.class, "liftRight"));
     }

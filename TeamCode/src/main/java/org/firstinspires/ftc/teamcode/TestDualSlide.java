@@ -22,7 +22,7 @@ public class TestDualSlide extends OpMode {
         slideLeft = hardwareMap.get(DcMotorEx.class, "liftLeft");
         slideLeft.setDirection(DcMotorEx.Direction.REVERSE);
         slideRight = hardwareMap.get(DcMotorEx.class, "liftRight");
-        slides = new DualSlide(slideLeft, slideRight);
+        slides = new DualSlide(slideLeft, slideRight, true);
 //        slideLeft = new Slide(hardwareMap.get(DcMotorEx.class, "liftLeft"));
 //        slideRight = new Slide(hardwareMap.get(DcMotorEx.class, "liftRight"));
     }

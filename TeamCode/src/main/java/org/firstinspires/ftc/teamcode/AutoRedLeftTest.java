@@ -136,7 +136,7 @@ public class AutoRedLeftTest extends LinearOpMode {
                 getSamplePreset(isSample3),
                 new SleepAction(AutoTunables.WAIT_TIME),
                 new InstantAction(() -> {fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);}),
-                new SleepAction(AutoTunables.WAIT_TIME)
+                new SleepAction(AutoTunables.WAIT_TIME*2)
         );
     }
     public Action highBucketScoreAction(){
@@ -158,6 +158,7 @@ public class AutoRedLeftTest extends LinearOpMode {
         IMU imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters imuParameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         imu.initialize(imuParameters);
+        imu.resetYaw();
 
         DcMotorEx turretLeftMotor = hardwareMap.get(DcMotorEx.class, "turretLeft"); turretLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
         DcMotorEx turretRightMotor = hardwareMap.get(DcMotorEx.class, "turretRight");

@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.utils.ControlsToValues;
@@ -48,6 +49,7 @@ public class MainTeleOp extends OpMode{
     double targetTurretAngle = Math.PI*120/180;
     Action presetAction = new NullAction();
     List<LynxModule> allHubs;
+    ElapsedTime elpasedTime;
 
     public double handPosFromAngle(double angle, double turretAngle){
         return (angle-(Math.PI*3/2-turretAngle)+Math.PI-RobotConstants.HAND_START_ANGLE)*(RobotConstants.HAND_PARALLEL_POS-RobotConstants.HAND_START_POS)/(Math.PI-RobotConstants.HAND_START_ANGLE)+RobotConstants.HAND_START_POS;
@@ -110,9 +112,6 @@ public class MainTeleOp extends OpMode{
                 new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, 10.5), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
                 new DualTurretAction(turrets).setTargetAngleRadians(Math.PI*60/180)
         );
-        fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
-        wrist.setPosition(RobotConstants.WRIST_START_POS);
-        hand.setPosition(RobotConstants.HAND_START_POS);
 
         allHubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule module : allHubs) {
@@ -128,6 +127,8 @@ public class MainTeleOp extends OpMode{
             module.clearBulkCache();
         }
 
+        telemetry.addData("Ping (ms): ", elpasedTime.milliseconds());
+        elpasedTime.reset();
         telemetry.addData("MODE: ", controlState.name());
         telemetry.addData("Turret Angle: ", turrets.getAngleDegrees());
         telemetry.addData("Slide Length: ", slides.getLength());
