@@ -118,6 +118,8 @@ public class MainTeleOp extends OpMode{
             module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
+        elpasedTime = new ElapsedTime();
+
         Transfer.ranAuto = false;
     }
 

@@ -11,8 +11,8 @@ public class AutoTunables {
     public static double GRAB_FINGER_OPEN_POS = 1.0; //Extra open so we have more error room
     public static double SAMPLE_3_X = 39;
     public static double SAMPLE_3_Y = 43.25;
-    public static double SAMPLE_GRAB_HEIGHT = 9.0;
-    public static double SAMPLE_X = 22.75;
+    public static double SAMPLE_GRAB_HEIGHT = 9.5;
+    public static double SAMPLE_X = 22.5;
     public static double SAMPLE_Y = 35.5;
     public static double SPECIMEN_END_HEIGHT = 8.0;
     public static double SPECIMEN_FORWARD = 16.25;

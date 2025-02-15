@@ -6,13 +6,13 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -31,11 +31,12 @@ import org.firstinspires.ftc.teamcode.utils.RobotConstants;
 import org.firstinspires.ftc.teamcode.utils.Transfer;
 
 @Autonomous
-public class AutoRedLeftTest extends LinearOpMode {
+public class AutoRedLeftTestTeletubbies extends LinearOpMode {
     MecanumDrive drive;
     DualSlide slides;
     DualTurret turrets;
     Servo fingers, hand, wrist;
+    public static double OFFSET = -5;
     public double handPosFromAngle(double angle, double turretAngle){
         return (angle-(Math.PI*3/2-turretAngle)+Math.PI-RobotConstants.HAND_START_ANGLE)*(RobotConstants.HAND_PARALLEL_POS-RobotConstants.HAND_START_POS)/(Math.PI-RobotConstants.HAND_START_ANGLE)+RobotConstants.HAND_START_POS;
     }
@@ -182,7 +183,7 @@ public class AutoRedLeftTest extends LinearOpMode {
 
         waitForStart();
 
-        TrajectoryActionBuilder forward = drive.actionBuilder(initialPose).lineToX(AutoTunables.SPECIMEN_FORWARD, new TranslationalVelConstraint(AutoTunables.SPECIMEN_FORWARD_SPEED*50));
+        TrajectoryActionBuilder forward = drive.actionBuilder(initialPose).splineToConstantHeading(new Vector2d(AutoTunables.SPECIMEN_FORWARD-5, -4), Math.toRadians(0));
         Action scoreSpecimen = new SequentialAction(
                 new ParallelAction(
                         specimenPreset(),
@@ -205,30 +206,30 @@ public class AutoRedLeftTest extends LinearOpMode {
                 new SleepAction(AutoTunables.WAIT_TIME)
         );
         TrajectoryActionBuilder moveToSamples = forward.endTrajectory().fresh().
-                setTangent(Math.toRadians(90)).splineToConstantHeading(new Vector2d(AutoTunables.SAMPLE_X, AutoTunables.SAMPLE_Y), 0);
+                setTangent(Math.toRadians(90)).splineToConstantHeading(new Vector2d(AutoTunables.SAMPLE_X, AutoTunables.SAMPLE_Y + OFFSET), 0);
         TrajectoryActionBuilder moveToBasket = moveToSamples.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
+                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y + OFFSET, Math.toRadians(135)), Math.toRadians(135));
         TrajectoryActionBuilder goToSample2FromBasket = moveToBasket.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
-                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_X, AutoTunables.SAMPLE_Y +11, Math.toRadians(0)), Math.toRadians(0));
+                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_X, AutoTunables.SAMPLE_Y + OFFSET +11, Math.toRadians(0)), Math.toRadians(0));
         TrajectoryActionBuilder moveToBasket2 = goToSample2FromBasket.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
+                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y + OFFSET, Math.toRadians(135)), Math.toRadians(135));
         TrajectoryActionBuilder goToSample3FromBasketPart1 = moveToBasket2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
-                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_3_X, AutoTunables.SAMPLE_Y, Math.toRadians(90)), Math.toRadians(0));
+                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_3_X, AutoTunables.SAMPLE_Y + OFFSET, Math.toRadians(90)), Math.toRadians(0));
         TrajectoryActionBuilder goToSample3FromBasketPart2 = goToSample3FromBasketPart1.endTrajectory().fresh()
                 .setTangent(Math.toRadians(90))
-                .lineToY(AutoTunables.SAMPLE_3_Y);
+                .lineToY(AutoTunables.SAMPLE_3_Y + OFFSET);
         TrajectoryActionBuilder moveToBasket3 = goToSample3FromBasketPart2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(-90))
-                .lineToY(AutoTunables.SAMPLE_Y)
-                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
+                .lineToY(AutoTunables.SAMPLE_Y + OFFSET)
+                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y + OFFSET, Math.toRadians(135)), Math.toRadians(135));
         TrajectoryActionBuilder end = moveToBasket3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(AutoTunables.END_X, AutoTunables.SAMPLE_3_Y, Math.toRadians(-90)), Math.toRadians(-90))
-                .splineToSplineHeading(new Pose2d(AutoTunables.END_X, AutoTunables.END_Y, Math.toRadians(-90)), Math.toRadians(-90));
+                .splineToSplineHeading(new Pose2d(AutoTunables.END_X, AutoTunables.SAMPLE_3_Y + OFFSET, Math.toRadians(-90)), Math.toRadians(-90))
+                .splineToSplineHeading(new Pose2d(AutoTunables.END_X, AutoTunables.END_Y + OFFSET, Math.toRadians(-90)), Math.toRadians(-90));
 
         Actions.runBlocking(new SequentialAction(
                 //Score preload specimen
