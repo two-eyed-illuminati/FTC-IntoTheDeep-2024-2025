@@ -14,16 +14,20 @@ public class DualTurret {
     public final double RESTING_ANGLE_RADIANS = Math.PI*120.0/180.0;
     public final double MAX_PULSES = (40.0/360.0)*(5281.1*4);
 
-    public DualTurret(DcMotorEx turretMotor1, DcMotorEx turretMotor2) {
+    public DualTurret(DcMotorEx turretMotor1, DcMotorEx turretMotor2, boolean reset) {
         this.turretMotor1 = turretMotor1;
-        this.turretMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        this.turretMotor1.setTargetPosition(0);
+        if(reset) {
+            this.turretMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            this.turretMotor1.setTargetPosition(0);
+        }
         this.turretMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.turretMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         this.turretMotor2 = turretMotor2;
-        this.turretMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        this.turretMotor2.setTargetPosition(0);
+        if(reset) {
+            this.turretMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            this.turretMotor2.setTargetPosition(0);
+        }
         this.turretMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.turretMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }

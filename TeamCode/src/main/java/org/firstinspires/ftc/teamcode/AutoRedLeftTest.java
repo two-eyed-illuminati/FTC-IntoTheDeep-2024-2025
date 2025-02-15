@@ -161,18 +161,17 @@ public class AutoRedLeftTest extends LinearOpMode {
 
         DcMotorEx turretLeftMotor = hardwareMap.get(DcMotorEx.class, "turretLeft"); turretLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
         DcMotorEx turretRightMotor = hardwareMap.get(DcMotorEx.class, "turretRight");
-        turrets = new DualTurret(turretLeftMotor, turretRightMotor);
+        turrets = new DualTurret(turretLeftMotor, turretRightMotor, true);
 
         DcMotorEx slideLeftMotor = hardwareMap.get(DcMotorEx.class, "liftLeft"); slideLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
         DcMotorEx slideRightMotor = hardwareMap.get(DcMotorEx.class, "liftRight");
-        slides = new DualSlide(slideLeftMotor, slideRightMotor);
+        slides = new DualSlide(slideLeftMotor, slideRightMotor, true);
 
         fingers = hardwareMap.get(Servo.class, "fingers"); fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
         hand = hardwareMap.get(Servo.class, "hand"); hand.setPosition(RobotConstants.HAND_START_POS);
         wrist = hardwareMap.get(Servo.class, "wrist"); wrist.setPosition(RobotConstants.WRIST_START_POS);
 
-        Transfer.dualSlides = slides;
-        Transfer.dualTurrets = turrets;
+        Transfer.ranAuto = true;
         Transfer.imu = imu;
 
         telemetry.addData("Slide Length", slides.getLength());
@@ -353,11 +352,10 @@ public class AutoRedLeftTest extends LinearOpMode {
                         new SequentialAction(
                                 new SleepAction(AutoTunables.WAIT_TIME),
                                 resetPreset(),
-                                new DualSlideSetLength(slides, 10)
-//                                new ParallelAction(
-//                                        new DualTurretAction(turrets).setTargetAngleRadians(Math.atan2(AutoTunables.SPECIMEN_START_HEIGHT, 14) + Math.PI * 90 / 180),
-//                                        new DualSlideSetLength(slides, Math.sqrt(Math.pow(AutoTunables.SPECIMEN_START_HEIGHT, 2) + Math.pow(10, 2)))
-//                                )
+                                new ParallelAction(
+                                        new DualTurretAction(turrets).setTargetAngleRadians(Math.atan2(5, 12) + Math.PI * 90 / 180),
+                                        new DualSlideSetLength(slides, Math.sqrt(Math.pow(5, 2) + Math.pow(12, 2)))
+                                )
                         )
                 )
         ));

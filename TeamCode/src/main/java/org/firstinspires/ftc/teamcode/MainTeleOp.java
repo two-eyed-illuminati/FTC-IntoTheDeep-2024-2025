@@ -69,7 +69,7 @@ public class MainTeleOp extends OpMode{
         br.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
         IMU imu;
-        if(Transfer.imu == null) {
+        if(!Transfer.ranAuto) {
             imu = hardwareMap.get(IMU.class, "imu");
             IMU.Parameters imuParameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
             imu.initialize(imuParameters);
@@ -87,21 +87,26 @@ public class MainTeleOp extends OpMode{
         DcMotorEx turretLeftMotor = hardwareMap.get(DcMotorEx.class, "turretLeft");
         turretLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
         DcMotorEx turretRightMotor = hardwareMap.get(DcMotorEx.class, "turretRight");
-        turrets = new DualTurret(turretLeftMotor, turretRightMotor);
+        turrets = new DualTurret(turretLeftMotor, turretRightMotor, !Transfer.ranAuto);
 
         DcMotorEx slideLeftMotor = hardwareMap.get(DcMotorEx.class, "liftLeft");
         slideLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
         DcMotorEx slideRightMotor = hardwareMap.get(DcMotorEx.class, "liftRight");
-        slides = new DualSlide(slideLeftMotor, slideRightMotor);
+        slides = new DualSlide(slideLeftMotor, slideRightMotor, !Transfer.ranAuto);
 
         slideCtv.cubicLowerSpeedValue = 0.2;
 
-        fingers = hardwareMap.get(Servo.class, "fingers"); fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
-        hand = hardwareMap.get(Servo.class, "hand"); hand.setPosition(RobotConstants.HAND_START_POS);
-        wrist = hardwareMap.get(Servo.class, "wrist"); wrist.setPosition(RobotConstants.WRIST_START_POS);
+        fingers = hardwareMap.get(Servo.class, "fingers");
+        hand = hardwareMap.get(Servo.class, "hand");
+        wrist = hardwareMap.get(Servo.class, "wrist");
 
         controlState = ControlState.PRESET;
         presetAction = new ParallelAction(
+                new InstantAction(() -> {
+                    fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
+                    hand.setPosition(RobotConstants.HAND_START_POS);
+                    wrist.setPosition(RobotConstants.WRIST_START_POS);
+                }),
                 new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, 10.5), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
                 new DualTurretAction(turrets).setTargetAngleRadians(Math.PI*60/180)
         );
@@ -113,6 +118,8 @@ public class MainTeleOp extends OpMode{
         for (LynxModule module : allHubs) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
+
+        Transfer.ranAuto = false;
     }
 
     @Override

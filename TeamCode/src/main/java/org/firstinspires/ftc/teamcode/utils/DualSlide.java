@@ -13,16 +13,20 @@ public class DualSlide {
     public final double PULSES_PER_INCH = (2208.0)/(36.75-10);
     public final double COLLAPSED_LENGTH = 10.0; // Length from pivot point to claw
     public final double MAX_PULSES = 2208.0; // Maximum encoder value for fully extended slide
-    public DualSlide(DcMotorEx slideMotor1, DcMotorEx slideMotor2) {
+    public DualSlide(DcMotorEx slideMotor1, DcMotorEx slideMotor2, boolean reset) {
         this.slideMotor1 = slideMotor1;
-        this.slideMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        this.slideMotor1.setTargetPosition(0);
+        if (reset) {
+            this.slideMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            this.slideMotor1.setTargetPosition(0);
+        }
         this.slideMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.slideMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         this.slideMotor2 = slideMotor2;
-        this.slideMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        this.slideMotor2.setTargetPosition(0);
+        if (reset){
+            this.slideMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            this.slideMotor2.setTargetPosition(0);
+        }
         this.slideMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.slideMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
