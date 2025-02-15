@@ -6,13 +6,13 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -31,7 +31,7 @@ import org.firstinspires.ftc.teamcode.utils.RobotConstants;
 import org.firstinspires.ftc.teamcode.utils.Transfer;
 
 @Autonomous
-public class AutoRedLeftTest extends LinearOpMode {
+public class AutoRedLeftTest4Samples extends LinearOpMode {
     MecanumDrive drive;
     DualSlide slides;
     DualTurret turrets;
@@ -152,7 +152,7 @@ public class AutoRedLeftTest extends LinearOpMode {
     @Override
     public void runOpMode(){
         MultipleTelemetry multTele = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        Pose2d initialPose = new Pose2d(0, 0, 0);
+        Pose2d initialPose = new Pose2d(0, 24, 0);
         drive = new MecanumDrive(hardwareMap, initialPose);
 
         IMU imu = hardwareMap.get(IMU.class, "imu");
@@ -182,30 +182,12 @@ public class AutoRedLeftTest extends LinearOpMode {
 
         waitForStart();
 
-        TrajectoryActionBuilder forward = drive.actionBuilder(initialPose).lineToX(AutoTunables.SPECIMEN_FORWARD, new TranslationalVelConstraint(AutoTunables.SPECIMEN_FORWARD_SPEED*50));
-        Action scoreSpecimen = new SequentialAction(
-                new ParallelAction(
-                        specimenPreset(),
-                        new SequentialAction(
-                                new SleepAction(AutoTunables.WAIT_TIME),
-                                new InstantAction(() -> {
-                                    drive.maxCorrectionTime = 3;
-                                    drive.correctionMargin = 0.25;
-                                }),
-                                forward.build(),
-                                new InstantAction(() -> {
-                                    drive.maxCorrectionTime = 0.5;
-                                    drive.correctionMargin = 0.5;
-                                })
-                        )
-                ),
-                new SleepAction(AutoTunables.WAIT_TIME),
-                speciDown(),
-                new InstantAction(() -> {fingers.setPosition(RobotConstants.FINGER_OPEN_POS);}),
-                new SleepAction(AutoTunables.WAIT_TIME)
-        );
-        TrajectoryActionBuilder moveToSamples = forward.endTrajectory().fresh().
-                setTangent(Math.toRadians(90)).splineToConstantHeading(new Vector2d(AutoTunables.SAMPLE_X, AutoTunables.SAMPLE_Y), 0);
+        TrajectoryActionBuilder forward = drive.actionBuilder(initialPose).lineToX(AutoTunables.SPECIMEN_FORWARD-12, new TranslationalVelConstraint(AutoTunables.SPECIMEN_FORWARD_SPEED*50));
+        TrajectoryActionBuilder startMoveToBasket = forward.endTrajectory().fresh()
+                .setTangent(Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
+        TrajectoryActionBuilder moveToSamples = startMoveToBasket.endTrajectory().fresh().
+                setTangent(Math.toRadians(90)).splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_X, AutoTunables.SAMPLE_Y, 0), 0);
         TrajectoryActionBuilder moveToBasket = moveToSamples.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
                 .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
@@ -223,7 +205,7 @@ public class AutoRedLeftTest extends LinearOpMode {
                 .lineToY(AutoTunables.SAMPLE_3_Y);
         TrajectoryActionBuilder moveToBasket3 = goToSample3FromBasketPart2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(-90))
-                .lineToY(AutoTunables.SAMPLE_Y-3)
+                .lineToY(AutoTunables.SAMPLE_Y)
                 .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
         TrajectoryActionBuilder end = moveToBasket3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
@@ -231,13 +213,22 @@ public class AutoRedLeftTest extends LinearOpMode {
                 .splineToSplineHeading(new Pose2d(AutoTunables.END_X, AutoTunables.END_Y, Math.toRadians(-90)), Math.toRadians(-90));
 
         Actions.runBlocking(new SequentialAction(
-                //Score preload specimen
+                //Score Preloaded Sample
                 new InstantAction(() -> {
                     TelemetryPacket p = new TelemetryPacket();
                     p.put("State", 0);
                     FtcDashboard.getInstance().sendTelemetryPacket(p);
                 }),
-                scoreSpecimen,
+                forward.build(),
+                new ParallelAction(
+                        basketPreset(),
+                        new InstantAction(() -> {hand.setPosition(handPosFromAngle(Math.PI*90/180, Math.PI*155/180));}),
+                        new SequentialAction(
+                                new SleepAction(AutoTunables.WAIT_TIME*2),
+                                moveToBasket.build()
+                        )
+                ),
+                highBucketScoreAction(),
                 //Move to samples
                 new InstantAction(() -> {
                     TelemetryPacket p = new TelemetryPacket();
