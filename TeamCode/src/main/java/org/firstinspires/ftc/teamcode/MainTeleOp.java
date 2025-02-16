@@ -267,11 +267,11 @@ public class MainTeleOp extends OpMode{
 
         //Servo Controls
         if(gamepad2.dpad_right || (gamepad1.dpad_right && controlState.equals(ControlState.GRAB))){
-            double newPos = Math.min(RobotConstants.WRIST_START_POS+RobotConstants.WRIST_START_POS-RobotConstants.WRIST_PERPEN_POS, wrist.getPosition()+0.02);
+            double newPos = Math.min(1, wrist.getPosition()+0.02);
             wrist.setPosition(newPos);
         }
         else if(gamepad2.dpad_left || (gamepad1.dpad_left && controlState.equals(ControlState.GRAB))){
-            double newPos = Math.max(RobotConstants.WRIST_PERPEN_POS, wrist.getPosition()-0.02);
+            double newPos = Math.max(0, wrist.getPosition()-0.02);
             wrist.setPosition(newPos);
         }
 

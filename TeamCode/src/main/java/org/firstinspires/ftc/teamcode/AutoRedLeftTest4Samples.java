@@ -236,18 +236,11 @@ public class AutoRedLeftTest4Samples extends LinearOpMode {
                     FtcDashboard.getInstance().sendTelemetryPacket(p);
                 }),
                 new ParallelAction(
-                        new DualSlideSetLength(slides, 11.5),
-                        new DualTurretAction(turrets).setTargetAngleRadians(Math.PI * 60 / 180),
-                        new InstantAction(() -> {hand.setPosition(RobotConstants.HAND_START_POS);}),
+                        moveToSamples.build(),
                         new SequentialAction(
-                            new SleepAction(AutoTunables.WAIT_TIME),
-                            new ParallelAction(
-                                moveToSamples.build(),
-                                new InstantAction(() -> {
-                                    fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
-                                    wrist.setPosition(RobotConstants.WRIST_START_POS);
-                                })
-                            )
+                                new SleepAction(AutoTunables.WAIT_TIME),
+                                new InstantAction(() -> {fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS);}),
+                                prepGetSamplePreset(false)
                         )
                 ),
                 //Sample #1

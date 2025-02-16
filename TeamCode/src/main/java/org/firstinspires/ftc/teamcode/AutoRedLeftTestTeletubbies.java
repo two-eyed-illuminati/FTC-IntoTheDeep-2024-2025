@@ -6,13 +6,13 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -36,7 +36,6 @@ public class AutoRedLeftTestTeletubbies extends LinearOpMode {
     DualSlide slides;
     DualTurret turrets;
     Servo fingers, hand, wrist;
-    public static double OFFSET = -5;
     public double handPosFromAngle(double angle, double turretAngle){
         return (angle-(Math.PI*3/2-turretAngle)+Math.PI-RobotConstants.HAND_START_ANGLE)*(RobotConstants.HAND_PARALLEL_POS-RobotConstants.HAND_START_POS)/(Math.PI-RobotConstants.HAND_START_ANGLE)+RobotConstants.HAND_START_POS;
     }
@@ -91,13 +90,13 @@ public class AutoRedLeftTestTeletubbies extends LinearOpMode {
         double targetSlideLength = Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight, 2));
 
         Action presetAction = new ParallelAction(
-          new DualTurretAction(turrets).setTargetAngleRadians(targetTurretAngle),
-          new DualSlideSetLength(slides, targetSlideLength),
-          new InstantAction(() -> {
-              fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS);
-              wrist.setPosition(isSample3 ? RobotConstants.WRIST_START_POS : RobotConstants.WRIST_PERPEN_POS);
-              hand.setPosition(handPosFromAngle(Math.PI*270/180, targetTurretAngle));
-          })
+                new DualTurretAction(turrets).setTargetAngleRadians(targetTurretAngle),
+                new DualSlideSetLength(slides, targetSlideLength),
+                new InstantAction(() -> {
+                    fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS);
+                    wrist.setPosition(isSample3 ? RobotConstants.WRIST_START_POS : RobotConstants.WRIST_PERPEN_POS);
+                    hand.setPosition(handPosFromAngle(Math.PI*270/180, targetTurretAngle));
+                })
         );
 
         return presetAction;
@@ -137,7 +136,7 @@ public class AutoRedLeftTestTeletubbies extends LinearOpMode {
                 getSamplePreset(isSample3),
                 new SleepAction(AutoTunables.WAIT_TIME),
                 new InstantAction(() -> {fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);}),
-                new SleepAction(AutoTunables.WAIT_TIME*3)
+                new SleepAction(AutoTunables.WAIT_TIME*5)
         );
     }
     public Action highBucketScoreAction(){
@@ -153,7 +152,7 @@ public class AutoRedLeftTestTeletubbies extends LinearOpMode {
     @Override
     public void runOpMode(){
         MultipleTelemetry multTele = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        Pose2d initialPose = new Pose2d(0, 0, 0);
+        Pose2d initialPose = new Pose2d(0, 24, 0);
         drive = new MecanumDrive(hardwareMap, initialPose);
 
         IMU imu = hardwareMap.get(IMU.class, "imu");
@@ -183,7 +182,7 @@ public class AutoRedLeftTestTeletubbies extends LinearOpMode {
 
         waitForStart();
 
-        TrajectoryActionBuilder forward = drive.actionBuilder(initialPose).splineToConstantHeading(new Vector2d(AutoTunables.SPECIMEN_FORWARD-5, -4), Math.toRadians(0));
+        TrajectoryActionBuilder forward = drive.actionBuilder(initialPose).lineToX(AutoTunables.SPECIMEN_FORWARD, new TranslationalVelConstraint(AutoTunables.SPECIMEN_FORWARD_SPEED*50));
         Action scoreSpecimen = new SequentialAction(
                 new ParallelAction(
                         specimenPreset(),
@@ -206,30 +205,30 @@ public class AutoRedLeftTestTeletubbies extends LinearOpMode {
                 new SleepAction(AutoTunables.WAIT_TIME)
         );
         TrajectoryActionBuilder moveToSamples = forward.endTrajectory().fresh().
-                setTangent(Math.toRadians(90)).splineToConstantHeading(new Vector2d(AutoTunables.SAMPLE_X, AutoTunables.SAMPLE_Y + OFFSET), 0);
+                setTangent(Math.toRadians(90)).splineToConstantHeading(new Vector2d(AutoTunables.SAMPLE_X, AutoTunables.SAMPLE_Y), 0);
         TrajectoryActionBuilder moveToBasket = moveToSamples.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y + OFFSET, Math.toRadians(135)), Math.toRadians(135));
+                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
         TrajectoryActionBuilder goToSample2FromBasket = moveToBasket.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
-                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_X, AutoTunables.SAMPLE_Y + OFFSET +11, Math.toRadians(0)), Math.toRadians(0));
+                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_X, AutoTunables.SAMPLE_Y +11, Math.toRadians(0)), Math.toRadians(0));
         TrajectoryActionBuilder moveToBasket2 = goToSample2FromBasket.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y + OFFSET, Math.toRadians(135)), Math.toRadians(135));
+                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
         TrajectoryActionBuilder goToSample3FromBasketPart1 = moveToBasket2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
-                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_3_X, AutoTunables.SAMPLE_Y + OFFSET, Math.toRadians(90)), Math.toRadians(0));
+                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_3_X, AutoTunables.SAMPLE_Y, Math.toRadians(90)), Math.toRadians(0));
         TrajectoryActionBuilder goToSample3FromBasketPart2 = goToSample3FromBasketPart1.endTrajectory().fresh()
                 .setTangent(Math.toRadians(90))
-                .lineToY(AutoTunables.SAMPLE_3_Y + OFFSET);
+                .lineToY(AutoTunables.SAMPLE_3_Y);
         TrajectoryActionBuilder moveToBasket3 = goToSample3FromBasketPart2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(-90))
-                .lineToY(AutoTunables.SAMPLE_Y + OFFSET)
-                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y + OFFSET, Math.toRadians(135)), Math.toRadians(135));
+                .lineToY(AutoTunables.SAMPLE_Y-3)
+                .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(135)), Math.toRadians(135));
         TrajectoryActionBuilder end = moveToBasket3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(AutoTunables.END_X, AutoTunables.SAMPLE_3_Y + OFFSET, Math.toRadians(-90)), Math.toRadians(-90))
-                .splineToSplineHeading(new Pose2d(AutoTunables.END_X, AutoTunables.END_Y + OFFSET, Math.toRadians(-90)), Math.toRadians(-90));
+                .splineToSplineHeading(new Pose2d(AutoTunables.END_X, AutoTunables.SAMPLE_3_Y, Math.toRadians(-90)), Math.toRadians(-90))
+                .splineToSplineHeading(new Pose2d(AutoTunables.END_X, AutoTunables.END_Y, Math.toRadians(-90)), Math.toRadians(-90));
 
         Actions.runBlocking(new SequentialAction(
                 //Score preload specimen
@@ -250,14 +249,14 @@ public class AutoRedLeftTestTeletubbies extends LinearOpMode {
                         new DualTurretAction(turrets).setTargetAngleRadians(Math.PI * 60 / 180),
                         new InstantAction(() -> {hand.setPosition(RobotConstants.HAND_START_POS);}),
                         new SequentialAction(
-                            new SleepAction(AutoTunables.WAIT_TIME),
-                            new ParallelAction(
-                                moveToSamples.build(),
-                                new InstantAction(() -> {
-                                    fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
-                                    wrist.setPosition(RobotConstants.WRIST_START_POS);
-                                })
-                            )
+                                new SleepAction(AutoTunables.WAIT_TIME),
+                                new ParallelAction(
+                                        moveToSamples.build(),
+                                        new InstantAction(() -> {
+                                            fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
+                                            wrist.setPosition(RobotConstants.WRIST_START_POS);
+                                        })
+                                )
                         )
                 ),
                 //Sample #1
@@ -321,8 +320,8 @@ public class AutoRedLeftTestTeletubbies extends LinearOpMode {
                                 new SleepAction(AutoTunables.WAIT_TIME),
                                 resetPreset(),
                                 new ParallelAction(
-                                    prepGetSamplePreset(true),
-                                    new InstantAction(() -> {fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS);})
+                                        prepGetSamplePreset(true),
+                                        new InstantAction(() -> {fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS);})
                                 )
                         )
                 ),
