@@ -13,6 +13,7 @@ public class Drive {
     //TODO increase when aashil gets better at driving
     public double rotSpeed = 0.6;
     public double moveSpeed = 0.6;
+    public double targetHeading;
 
     public Drive(DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br, IMU imu){
         this.fl = fl;
@@ -21,10 +22,11 @@ public class Drive {
         this.br = br;
         this.imu = imu;
         this.ctv = new ControlsToValues();
+        this.targetHeading = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
     }
 
     public void resetImu(){
-        imu.resetYaw();
+        imu.resetYaw(); this.targetHeading = 0;
     }
 
     public double[] driveNormal(double x, double y, double rotation, ControlsToValues ctv){
@@ -73,7 +75,12 @@ public class Drive {
         double targetRobotOrientedXMove = Math.sin(targetRobotOrientedMoveHeading) * targetSpeed;
         double targetRobotOrientedYMove = Math.cos(targetRobotOrientedMoveHeading) * targetSpeed;
 
-        double targetRotSpeed = ctv.targetSpeedFromJoysticks(rotation)*Math.signum(rotation)*rotSpeed;
+        double targetRotSpeed = 0;
+        if(rotation < 0.05){
+            targetRotSpeed = (targetHeading - currRobotHeading);
+        }else{
+            targetRotSpeed = ctv.targetSpeedFromJoysticks(rotation)*Math.signum(rotation)*rotSpeed;
+        }
 
         double flSpeed = targetRobotOrientedYMove + targetRobotOrientedXMove + targetRotSpeed;
         double frSpeed = targetRobotOrientedYMove - targetRobotOrientedXMove - targetRotSpeed;

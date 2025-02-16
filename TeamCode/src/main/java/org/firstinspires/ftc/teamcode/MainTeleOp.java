@@ -47,6 +47,8 @@ public class MainTeleOp extends OpMode{
     double targetGroundDistance; double clawGrabHeight;
     double targetSlideLength = 10.5; double targetSlideVelocity = 0;
     double targetTurretAngle = Math.PI*120/180;
+    double targetWristPos = RobotConstants.WRIST_START_POS;
+    ToggleButton wristUp = new ToggleButton(); ToggleButton wristDown = new ToggleButton();
     Action presetAction = new NullAction();
     List<LynxModule> allHubs;
     ElapsedTime elpasedTime;
@@ -266,12 +268,14 @@ public class MainTeleOp extends OpMode{
         telemetry.addData("br", motorPowers[3]);
 
         //Servo Controls
+        boolean wristUpPressed = wristUp.activated(gamepad2.dpad_right || (gamepad1.dpad_right && controlState.equals(ControlState.GRAB));
+        boolean wristDownPressed = wristDown.activated(gamepad2.dpad_left || (gamepad1.dpad_left && controlState.equals(ControlState.GRAB));
         if(gamepad2.dpad_right || (gamepad1.dpad_right && controlState.equals(ControlState.GRAB))){
-            double newPos = Math.min(1, wrist.getPosition()+0.02);
+            double newPos = Math.min(1, wrist.getPosition()+(wristUpPressed ? 0.1 : 0.02));
             wrist.setPosition(newPos);
         }
         else if(gamepad2.dpad_left || (gamepad1.dpad_left && controlState.equals(ControlState.GRAB))){
-            double newPos = Math.max(0, wrist.getPosition()-0.02);
+            double newPos = Math.max(0, wrist.getPosition()-(wristDownPressed ? 0.1 : 0.02));
             wrist.setPosition(newPos);
         }
 
@@ -286,23 +290,29 @@ public class MainTeleOp extends OpMode{
 
         //Controls for basically everything else
         if(controlState.equals(ControlState.GRAB)) {
-            targetGroundDistance += gamepad1.dpad_up ? (gamepad1.right_trigger > 0.8 ? 0.3 : 0.6) : 0;
-            targetGroundDistance -= gamepad1.dpad_down ? (gamepad1.right_trigger > 0.8 ? 0.3 : 0.6) : 0;
+            double actualGroundDistance = Math.sin(turrets.getAngleRadians()) * slides.getLength();
+            double groundDistanceChange = 0;
+            groundDistanceChange += gamepad1.dpad_up ? 1 : 0;
+            groundDistanceChange -= gamepad1.dpad_down ? 1 : 0;
+            targetGroundDistance = Math.abs(groundDistanceChange) > 0.01 ? 10000 * Math.signum(groundDistanceChange) :
+                    Math.abs(targetGroundDistance-actualGroundDistance) > 0.1 ? actualGroundDistance : targetGroundDistance;
             targetGroundDistance = Math.max(targetGroundDistance, 6.0);
             targetGroundDistance = Math.min(targetGroundDistance, RobotConstants.MAX_GROUND_DISTANCE);
 
-            clawGrabHeight += gamepad1.y ? (gamepad1.right_trigger > 0.8 ? 0.2 : 0.4) : 0;
-            clawGrabHeight -= gamepad1.a ? (gamepad1.right_trigger > 0.8 ? 0.2 : 0.4) : 0;
+            double actualGrabHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turrets.getAngleRadians()) * slides.getLength();
+            double grabHeightChange = 0;
+            grabHeightChange += gamepad1.y ? 1 : 0;
+            grabHeightChange -= gamepad1.a ? 1 : 0;
+            clawGrabHeight = Math.abs(grabHeightChange) > 0.01 ? 10000 * Math.signum(grabHeightChange) :
+                    Math.abs(clawGrabHeight-actualGrabHeight) > 0.1 ? actualGrabHeight : clawGrabHeight;
             clawGrabHeight = Math.max(clawGrabHeight, RobotConstants.MIN_GRAB_HEIGHT);
             clawGrabHeight = Math.min(clawGrabHeight, RobotConstants.MAX_GRAB_HEIGHT);
 
-            targetTurretAngle = Math.atan2(targetGroundDistance, RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight);
-            targetTurretAngle = Math.min(turrets.getAngleRadians() + Math.PI / 12, targetTurretAngle);
-            targetTurretAngle = Math.max(turrets.getAngleRadians() - Math.PI / 12, targetTurretAngle);
-            targetSlideLength = Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight, 2));
+            targetTurretAngle = Math.atan2(actualGroundDistance, RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight);
+            targetSlideLength = Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - actualGrabHeight, 2));
 
-            turrets.setAngleRadians(targetTurretAngle);
-            slides.setLength(targetSlideLength);
+            turrets.setAngleRadians(targetTurretAngle, (gamepad1.right_trigger > 0.8 ? 0.6 : 1) * 5281.1*30.0/60.0);
+            slides.setLength(targetSlideLength, (gamepad1.right_trigger > 0.8 ? 0.2 : 1) * 384.5*435.0/60.0);
             hand.setPosition(handPosFromAngle(Math.PI*270/180, targetTurretAngle));
 
             telemetry.addData("Target Ground Distance: ", targetGroundDistance);
