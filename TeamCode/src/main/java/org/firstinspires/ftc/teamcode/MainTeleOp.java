@@ -229,6 +229,7 @@ public class MainTeleOp extends OpMode{
             presetAction = new ParallelAction(
                     new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, 36), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
                     new SequentialAction(
+                            new InstantAction(() -> {if(turrets.getAngleRadians() < Math.PI*110/180) hand.setPosition(handPosFromAngle(Math.PI * 145 / 180, Math.PI * 155 / 180));}),
                             new DualTurretAction(turrets).setMode(DualTurretAction.Mode.GO_ABOVE).setTargetAngleRadians(Math.PI*110/180),
                             new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI * 145 / 180, Math.PI * 155 / 180))),
                             new DualTurretAction(turrets).setTargetAngleRadians(Math.PI*155/180)
@@ -268,8 +269,8 @@ public class MainTeleOp extends OpMode{
         telemetry.addData("br", motorPowers[3]);
 
         //Servo Controls
-        boolean wristUpPressed = wristUp.activated(gamepad2.dpad_right || (gamepad1.dpad_right && controlState.equals(ControlState.GRAB));
-        boolean wristDownPressed = wristDown.activated(gamepad2.dpad_left || (gamepad1.dpad_left && controlState.equals(ControlState.GRAB));
+        boolean wristUpPressed = wristUp.activated(gamepad2.dpad_right || (gamepad1.dpad_right && controlState.equals(ControlState.GRAB)));
+        boolean wristDownPressed = wristDown.activated(gamepad2.dpad_left || (gamepad1.dpad_left && controlState.equals(ControlState.GRAB)));
         if(gamepad2.dpad_right || (gamepad1.dpad_right && controlState.equals(ControlState.GRAB))){
             double newPos = Math.min(1, wrist.getPosition()+(wristUpPressed ? 0.1 : 0.02));
             wrist.setPosition(newPos);
