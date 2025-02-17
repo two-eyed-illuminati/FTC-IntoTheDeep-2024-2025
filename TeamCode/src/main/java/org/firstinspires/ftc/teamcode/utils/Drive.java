@@ -76,9 +76,10 @@ public class Drive {
         double targetRobotOrientedYMove = Math.cos(targetRobotOrientedMoveHeading) * targetSpeed;
 
         double targetRotSpeed = 0;
-        if(rotation < 0.05){
+        if(Math.abs(rotation) < 0.05){
             targetRotSpeed = (targetHeading - currRobotHeading);
         }else{
+            targetHeading = currRobotHeading;
             targetRotSpeed = ctv.targetSpeedFromJoysticks(rotation)*Math.signum(rotation)*rotSpeed;
         }
 
