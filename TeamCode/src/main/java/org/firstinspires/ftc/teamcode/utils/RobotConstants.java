@@ -16,7 +16,7 @@ public class RobotConstants {
     public static double FINGER_OPEN_POS = 0.87;
     public static double HAND_START_POS = 0.4044;
     public static double HAND_PARALLEL_POS = 0.4994; //Pos where hand is parallel with slides
-    public static double HAND_START_ANGLE = Math.PI*15.0/180.0; //Acute angle between hand start and slides
+    public static double HAND_START_ANGLE = Math.PI*10.0/180.0; //Acute angle between hand start and slides
     public static double WRIST_START_POS = 0.5921;
     public static double WRIST_PERPEN_POS = 0.265; //Pos where wrist is perpendicular to slides
 }
