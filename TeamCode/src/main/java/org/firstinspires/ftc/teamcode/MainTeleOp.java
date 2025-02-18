@@ -143,11 +143,23 @@ public class MainTeleOp extends OpMode{
             if(!controlState.equals(ControlState.GRAB)) {
                 double currGroundHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turrets.getAngleRadians()) * slides.getLength();
                 if(currGroundHeight < 15){ //Make sure driver doesn't press this right after scoring in basket, otherwise could break servo
-                    controlState = ControlState.GRAB;
+                    controlState = ControlState.PRESET;
                     targetGroundDistance = 14.0;
                     clawGrabHeight = RobotConstants.MAX_GRAB_HEIGHT;
+                    targetTurretAngle = Math.atan2(targetGroundDistance, RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight);
+                    targetSlideLength = Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight, 2));
+                    presetAction = new SequentialAction(
+                            new ParallelAction(
+                                    new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, targetSlideLength), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
+                                    new DualTurretAction(turrets).setTargetAngleRadians(targetTurretAngle)
+                            ),
+                            new InstantAction(() -> {
+                                controlState = ControlState.GRAB;
+                            })
+                    );
                     fingers.setPosition(RobotConstants.FINGER_OPEN_POS);
                     wrist.setPosition(RobotConstants.WRIST_START_POS);
+                    hand.setPosition(handPosFromAngle(Math.PI*270/180, targetTurretAngle));
                 }
                 else{
                     controlState = ControlState.PRESET;
@@ -165,7 +177,6 @@ public class MainTeleOp extends OpMode{
                             new InstantAction(() -> {
                                 controlState = ControlState.GRAB;
                                 fingers.setPosition(RobotConstants.FINGER_OPEN_POS);
-                                wrist.setPosition(RobotConstants.WRIST_PERPEN_POS);
                             })
                     );
                     fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
