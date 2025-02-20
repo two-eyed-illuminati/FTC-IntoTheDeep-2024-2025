@@ -140,76 +140,62 @@ public class MainTeleOp extends OpMode{
 
         //Switching Control Modes
         if(g1lT.activated(gamepad1.left_trigger > 0.8)) {
-            if(!controlState.equals(ControlState.GRAB)) {
-                double currGroundHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turrets.getAngleRadians()) * slides.getLength();
-                if(currGroundHeight < 15){ //Make sure driver doesn't press this right after scoring in basket, otherwise could break servo
-                    controlState = ControlState.PRESET;
-                    targetGroundDistance = 14.0;
-                    clawGrabHeight = RobotConstants.MAX_GRAB_HEIGHT;
-                    targetTurretAngle = Math.atan2(targetGroundDistance, RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight);
-                    targetSlideLength = Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight, 2));
-                    presetAction = new SequentialAction(
-                            new ParallelAction(
-                                    new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, targetSlideLength), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
-                                    new DualTurretAction(turrets).setTargetAngleRadians(targetTurretAngle)
-                            ),
-                            new InstantAction(() -> {
-                                controlState = ControlState.GRAB;
-                            })
-                    );
-                    fingers.setPosition(RobotConstants.FINGER_OPEN_POS);
-                    wrist.setPosition(RobotConstants.WRIST_START_POS);
-                    hand.setPosition(handPosFromAngle(Math.PI*270/180, targetTurretAngle));
-                }
-                else{
-                    controlState = ControlState.PRESET;
-                    targetGroundDistance = 14.0;
-                    clawGrabHeight = RobotConstants.MAX_GRAB_HEIGHT;
-                    targetTurretAngle = Math.atan2(targetGroundDistance, RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight);
-                    targetSlideLength = Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight, 2));
+            targetGroundDistance = 14.0;
+            clawGrabHeight = RobotConstants.MAX_GRAB_HEIGHT;
+            targetTurretAngle = Math.atan2(targetGroundDistance, RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight);
+            targetSlideLength = Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight, 2));
 
-                    presetAction = new SequentialAction(
-                            new SleepAction(0.5), //wait for servos to move
-                            new ParallelAction(
-                                new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, targetSlideLength), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
-                                new DualTurretAction(turrets).setTargetAngleRadians(targetTurretAngle)
-                            ),
-                            new InstantAction(() -> {
-                                controlState = ControlState.GRAB;
-                                fingers.setPosition(RobotConstants.FINGER_OPEN_POS);
-                            })
-                    );
-                    fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
-                    wrist.setPosition(RobotConstants.WRIST_START_POS);
-                    hand.setPosition(RobotConstants.HAND_START_POS);
-                }
-            }
-            else {
-                controlState = ControlState.PRESET;
+            controlState = ControlState.PRESET;
+
+            presetAction = new ParallelAction(
+                    new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, targetSlideLength), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
+                    new DualTurretAction(turrets).setTargetAngleRadians(targetTurretAngle)
+            );
+
+            if(controlState.equals(ControlState.GRAB)){
                 double currGroundDistance = Math.sin(turrets.getAngleRadians()) * slides.getLength();
-                targetTurretAngle = Math.atan2(currGroundDistance, RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - (RobotConstants.MAX_GRAB_HEIGHT - 2));
                 presetAction = new SequentialAction(
-                        new DualTurretAction(turrets).setTargetAngleRadians(targetTurretAngle).setMargin(Math.PI * 4 / 180),
-                        new ParallelAction(
-                            new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI*110/180, targetTurretAngle))),
-                            new SleepAction(0.35) //wait for servos to move
-                        ),
-                        new ParallelAction(
-                            new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, 10.5), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
-                            new DualTurretAction(turrets).setTargetAngleRadians(Math.PI*60/180)
-                        ),
-                        new InstantAction(() -> hand.setPosition(RobotConstants.HAND_START_POS))
+                        new InstantAction(() -> {
+                            fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
+                            wrist.setPosition(RobotConstants.WRIST_START_POS);
+                        }),
+                        new DualTurretAction(turrets).setTargetAngleRadians(Math.atan2(currGroundDistance, RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - RobotConstants.MAX_GRAB_HEIGHT))
+                                .setMargin(Math.PI*4/180),
+                        presetAction,
+                        new InstantAction(() -> {
+                            hand.setPosition(handPosFromAngle(Math.PI*270/180, targetTurretAngle));
+                        })
                 );
-                fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
-                wrist.setPosition(RobotConstants.WRIST_START_POS);
+            }
+            else{
+                double currGroundHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turrets.getAngleRadians()) * slides.getLength();
+                if(currGroundHeight > 15) {
+                    presetAction = new NullAction();
+                }
+                presetAction = new SequentialAction(
+                        new InstantAction(() -> {
+                            fingers.setPosition(RobotConstants.FINGER_OPEN_POS);
+                            wrist.setPosition(RobotConstants.WRIST_START_POS);
+                            hand.setPosition(handPosFromAngle(Math.PI*270/180, targetTurretAngle));
+                        }),
+                        presetAction,
+                        new InstantAction(() -> {
+                            controlState = ControlState.GRAB;
+                        })
+                );
+
             }
         }
 
         if(gamepad2.a && !controlState.equals(ControlState.GRAB)){
             controlState = ControlState.PRESET;
+            targetGroundDistance = 14.0;
+            clawGrabHeight = RobotConstants.MAX_GRAB_HEIGHT;
+            targetTurretAngle = Math.atan2(targetGroundDistance, RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight);
+            targetSlideLength = Math.sqrt(Math.pow(targetGroundDistance, 2) + Math.pow(RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - clawGrabHeight, 2));
             presetAction = new ParallelAction(
-                    new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, 10.5), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
-                    new DualTurretAction(turrets).setTargetAngleRadians(Math.PI * 90 / 180)
+                    new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, targetSlideLength), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
+                    new DualTurretAction(turrets).setTargetAngleRadians(targetTurretAngle)
             );
             double currGroundHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turrets.getAngleRadians()) * slides.getLength();
             if(currGroundHeight > 15){
@@ -219,19 +205,6 @@ public class MainTeleOp extends OpMode{
             fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
             wrist.setPosition(RobotConstants.WRIST_START_POS);
             hand.setPosition(RobotConstants.HAND_START_POS);
-        }
-        if(gamepad2.x && !controlState.equals(ControlState.GRAB)){
-            controlState = ControlState.PRESET;
-            presetAction = new ParallelAction(
-                    new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, Math.sqrt(Math.pow(11.5, 2) + Math.pow(12, 2))), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
-                    new SequentialAction(
-                            new DualTurretAction(turrets).setMode(DualTurretAction.Mode.GO_ABOVE).setTargetAngleRadians(Math.PI * 110 / 180),
-                            new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI * 180 / 180, Math.atan2(11.5, 12) + Math.PI * 90 / 180))),
-                            new DualTurretAction(turrets).setTargetAngleRadians(Math.atan2(11.5, 12) + Math.PI * 90 / 180)
-                    )
-            );
-            fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
-            wrist.setPosition(RobotConstants.WRIST_PERPEN_POS);
         }
         if(gamepad2.y && !controlState.equals(ControlState.GRAB)){
             controlState = ControlState.PRESET;
