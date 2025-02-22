@@ -10,8 +10,8 @@ public class RobotConstants {
     public static double MAX_GROUND_DISTANCE = 10+13; //Max ground length of slides
     public static double MAX_PRESET_GROUND_DISTANCE = 10+13/2.0; //have a lower limit for max slide length for presets
     public static double MIN_GROUND_HEIGHT = 5;
-    public static double MIN_GRAB_HEIGHT = 9.5;
-    public static double MAX_GRAB_HEIGHT = 12.6;
+    public static double MIN_GRAB_HEIGHT = 8.2;
+    public static double MAX_GRAB_HEIGHT = 11.6;
     public static double FINGER_CLOSE_POS = 0.5;
     public static double FINGER_OPEN_POS = 0.87;
     public static double HAND_START_POS = 0.4044;

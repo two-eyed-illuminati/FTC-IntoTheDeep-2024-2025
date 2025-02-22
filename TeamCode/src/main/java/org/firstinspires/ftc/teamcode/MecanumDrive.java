@@ -61,7 +61,7 @@ public final class MecanumDrive {
 
         // drive model parameters
         public double inPerTick = 123.0/41972.5;
-        public double lateralInPerTick = 0.0021086385872807123;
+        public double lateralInPerTick = 0.0021086385872807123*(96.0/92.0);
         public double trackWidthTicks = 4585.3552197539675;
 
         // feedforward parameters (in tick units)
@@ -80,8 +80,8 @@ public final class MecanumDrive {
 
         // path controller gains
         public double axialGain = 12.0;
-        public double lateralGain = 6.0;
-        public double headingGain = 6.0; // shared with turn
+        public double lateralGain = 12.0;
+        public double headingGain = 20.0; // shared with turn
 
         public double axialVelGain = 0.0;
         public double lateralVelGain = 0.0;
@@ -258,7 +258,7 @@ public final class MecanumDrive {
         rightFront.setPower(wheelVels.rightFront.get(0) / maxPowerMag);
     }
 
-    public double maxCorrectionTime = 0.5;
+    public double maxCorrectionTime = 3.0;
     public double correctionMargin = 0.5;
 
     public final class FollowTrajectoryAction implements Action {
@@ -346,7 +346,7 @@ public final class MecanumDrive {
             c.strokePolyline(xPoints, yPoints);
 
             if ((t >= timeTrajectory.duration && error.position.norm() < correctionMargin && robotVelRobot.linearVel.norm() < 0.5
-                    && error.heading.toDouble() < Math.toRadians(5)) || t >= timeTrajectory.duration + maxCorrectionTime) {
+                    && error.heading.toDouble() < Math.toRadians(2)) || t >= timeTrajectory.duration + maxCorrectionTime) {
                 leftFront.setPower(0);
                 leftBack.setPower(0);
                 rightBack.setPower(0);

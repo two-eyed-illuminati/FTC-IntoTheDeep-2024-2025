@@ -11,7 +11,7 @@ public class DualTurret {
     public DcMotorEx turretMotor1;
     public DcMotorEx turretMotor2;
     public final double PULSES_PER_REVOLUTION = 5281.1*4; // 4 is gear ratio
-    public final double RESTING_ANGLE_RADIANS = Math.PI*120.0/180.0;
+    public final double RESTING_ANGLE_RADIANS = Math.PI*115.0/180.0;
     public final double MAX_PULSES = (40.0/360.0)*(5281.1*4);
 
     public DualTurret(DcMotorEx turretMotor1, DcMotorEx turretMotor2, boolean reset) {

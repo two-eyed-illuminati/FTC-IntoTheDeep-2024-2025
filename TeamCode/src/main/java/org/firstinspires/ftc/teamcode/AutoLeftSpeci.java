@@ -10,13 +10,14 @@ import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.example.meepmeeptesting.AutoTunables;
+import org.firstinspires.ftc.teamcode.utils.AutoTunables;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.robot.Robot;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.utils.DualSlide;
@@ -72,22 +73,22 @@ public class AutoLeftSpeci extends LinearOpMode {
     }
     public Action highBasketPreset(){
         return new ParallelAction(
-                new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, 36), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
+                new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, 36), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE+2),
                 new SequentialAction(
                         new InstantAction(() -> {if(turrets.getAngleRadians() < Math.PI*110/180) hand.setPosition(handPosFromAngle(Math.PI * 145 / 180, Math.PI * 155 / 180));}),
                         new DualTurretAction(turrets).setMode(DualTurretAction.Mode.GO_ABOVE).setTargetAngleRadians(Math.PI*110/180),
-                        new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI * 145 / 180, Math.PI * 155 / 180))),
-                        new DualTurretAction(turrets).setTargetAngleRadians(Math.PI*155/180)
+                        new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI * 145 / 180, Math.PI * 150 / 180))),
+                        new DualTurretAction(turrets).setTargetAngleRadians(Math.PI*150/180)
                 ),
                 new InstantAction(() -> wrist.setPosition(RobotConstants.WRIST_PERPEN_POS))
         );
     }
-    public Action defaultPreset(){
+    public Action defaultPreset(double turretAngle, double slideLen){
         Action presetAction = new ParallelAction(
                 new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, 10.5), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
                 new DualTurretAction(turrets).setTargetAngleRadians(Math.PI * 90 / 180)
         );
-        double currGroundHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turrets.getAngleRadians()) * slides.getLength();
+        double currGroundHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turretAngle) * slideLen;
         if(currGroundHeight > 15){
             //Wait for hand servo to come back if we're coming back from a basket
             presetAction = new SequentialAction(new SleepAction(0.5), presetAction);
@@ -143,14 +144,15 @@ public class AutoLeftSpeci extends LinearOpMode {
                 .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(45)), Math.toRadians(45));
         TrajectoryActionBuilder goToSample2FromBasket = moveToBasket.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
-                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_X + 10.5, AutoTunables.SAMPLE_Y, Math.toRadians(-90)), Math.toRadians(-90));
+                .splineToLinearHeading(new Pose2d(AutoTunables.SAMPLE_X + 10, AutoTunables.SAMPLE_Y, Math.toRadians(-90)), Math.toRadians(-90));
         TrajectoryActionBuilder moveToBasket2 = goToSample2FromBasket.endTrajectory().fresh()
                 .setTangent(Math.toRadians(90))
                 .splineToLinearHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(45)), Math.toRadians(90));
         TrajectoryActionBuilder goToSample3FromBasket = moveToBasket2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(-90))
                 .splineToSplineHeading(new Pose2d(AutoTunables.SAMPLE_X, AutoTunables.SAMPLE_3_Y, Math.toRadians(0)), Math.toRadians(0))
-                .lineToX(AutoTunables.SAMPLE_3_X);;
+                .waitSeconds(0.5)
+                .lineToX(AutoTunables.SAMPLE_3_X);
         TrajectoryActionBuilder moveToBasket3 = goToSample3FromBasket.endTrajectory().fresh()
                 .setTangent(Math.toRadians(-180))
                 .lineToX(AutoTunables.SAMPLE_X-3)
@@ -164,54 +166,71 @@ public class AutoLeftSpeci extends LinearOpMode {
                 new SequentialAction(
                         toSpecimen.build(),
                         moveToSamples.build(),
+                        new InstantAction(() -> wrist.setPosition(RobotConstants.WRIST_PERPEN_POS)),
+                        new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI*290/180, findTargetTurretAngle(11.0, AutoTunables.SAMPLE_GRAB_HEIGHT)))),
+                        new InstantAction(() -> fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS)),
+                        new SleepAction(AutoTunables.WAIT_TIME),
                         new ParallelAction(
-                                setArmPos(11.0, AutoTunables.SAMPLE_GRAB_HEIGHT, false),
-                                new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI*270/180, findTargetTurretAngle(11.0, AutoTunables.SAMPLE_GRAB_HEIGHT)))),
-                                new InstantAction(() -> fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS))
+                                setArmPos(11, AutoTunables.SAMPLE_GRAB_HEIGHT, false)
                         ),
                         grab(),
+                        new SleepAction(AutoTunables.WAIT_TIME),
+                        highBasketPreset(),
                         new ParallelAction(
-                                moveToBasket.build(),
-                                highBasketPreset()
+                                moveToBasket.build()
                         ),
                         release(),
                         new ParallelAction(
                                 goToSample2FromBasket.build(),
-                                defaultPreset()
+                                defaultPreset(Math.toRadians(150), 36)
                         ),
+                        new InstantAction(() -> wrist.setPosition(RobotConstants.WRIST_PERPEN_POS)),
+                        new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI*290/180, findTargetTurretAngle(11.0, AutoTunables.SAMPLE_GRAB_HEIGHT)))),
+                        new InstantAction(() -> fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS)),
+                        new SleepAction(AutoTunables.WAIT_TIME*7),
                         new ParallelAction(
-                                setArmPos(11.0, AutoTunables.SAMPLE_GRAB_HEIGHT, false),
-                                new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI*270/180, findTargetTurretAngle(11.0, AutoTunables.SAMPLE_GRAB_HEIGHT)))),
-                                new InstantAction(() -> fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS))
+                                setArmPos(11, AutoTunables.SAMPLE_GRAB_HEIGHT, false)
                         ),
                         grab(),
+                        new SleepAction(AutoTunables.WAIT_TIME),
+                        highBasketPreset(),
                         new ParallelAction(
-                                moveToBasket2.build(),
-                                highBasketPreset()
+                                moveToBasket2.build()
                         ),
                         release(),
                         new ParallelAction(
                                 goToSample3FromBasket.build(),
                                 new SequentialAction(
-                                        defaultPreset(),
+                                        defaultPreset(Math.toRadians(150), 36),
                                         new ParallelAction(
-                                                setArmPos(11.0, AutoTunables.SAMPLE_GRAB_HEIGHT, false),
-                                                new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI*270/180, findTargetTurretAngle(11.0, AutoTunables.SAMPLE_GRAB_HEIGHT)))),
+                                                setArmPos(11.0, AutoTunables.SAMPLE_GRAB_HEIGHT+2, false),
+                                                new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI*290/180, findTargetTurretAngle(11.0, AutoTunables.SAMPLE_GRAB_HEIGHT)))),
                                                 new InstantAction(() -> fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS))
                                         )
                                 )
                         ),
+                        new InstantAction(() -> wrist.setPosition(RobotConstants.WRIST_START_POS)),
+                        new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI*290/180, findTargetTurretAngle(11.0, AutoTunables.SAMPLE_GRAB_HEIGHT)))),
+                        new InstantAction(() -> fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS)),
+                        new SleepAction(AutoTunables.WAIT_TIME*7),
+                        new ParallelAction(
+                                setArmPos(11, AutoTunables.SAMPLE_GRAB_HEIGHT, false)
+                        ),
                         grab(),
+                        new SleepAction(AutoTunables.WAIT_TIME),
                         new ParallelAction(
                                 moveToBasket3.build(),
-                                highBasketPreset()
+                                new SequentialAction(
+                                    new SleepAction(0.15),
+                                    highBasketPreset()
+                                )
                         ),
                         release(),
                         new ParallelAction(
                             toSubmersible.build(),
                             new SequentialAction(
-                                    defaultPreset(),
-                                    setArmPos(17.0, 14.0, false)
+                                    defaultPreset(Math.toRadians(150), 36),
+                                    setArmPos(18.0, 20.0, false)
                             )
                         )
                 )
