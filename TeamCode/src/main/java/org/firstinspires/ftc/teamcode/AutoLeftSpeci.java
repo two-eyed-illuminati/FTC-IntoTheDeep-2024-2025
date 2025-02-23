@@ -156,6 +156,7 @@ public class AutoLeftSpeci extends LinearOpMode {
         TrajectoryActionBuilder moveToBasket3 = goToSample3FromBasket.endTrajectory().fresh()
                 .setTangent(Math.toRadians(-180))
                 .lineToX(AutoTunables.SAMPLE_X-3)
+                .waitSeconds(0.5)
                 .splineToSplineHeading(new Pose2d(AutoTunables.BASKET_X, AutoTunables.BASKET_Y, Math.toRadians(45)), Math.toRadians(45));
         TrajectoryActionBuilder toSubmersible = moveToBasket3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(-90))
@@ -221,7 +222,7 @@ public class AutoLeftSpeci extends LinearOpMode {
                         new ParallelAction(
                                 moveToBasket3.build(),
                                 new SequentialAction(
-                                    new SleepAction(0.15),
+                                    new SleepAction(0.6),
                                     highBasketPreset()
                                 )
                         ),

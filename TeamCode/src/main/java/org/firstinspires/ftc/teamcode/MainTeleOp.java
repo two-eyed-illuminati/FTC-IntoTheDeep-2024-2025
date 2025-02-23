@@ -59,7 +59,6 @@ public class MainTeleOp extends OpMode{
     @Override
     public void init() {
         telemetry.addLine("REMINDER: Lift turret up and retract slides");
-        telemetry.update();
 
         fl = hardwareMap.get(DcMotorEx.class, "frontLeft");
         fl.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -85,6 +84,7 @@ public class MainTeleOp extends OpMode{
             Transfer.imu = null;
             telemetry.addLine("Found transferred imu");
             telemetry.addData("Angle:", -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            telemetry.addLine("PLEASE RUN THE RESET OP MODE IF THIS IS INCORRECT");
             fod = new Drive(fl, fr, bl, br, imu);
         }
 
@@ -120,7 +120,7 @@ public class MainTeleOp extends OpMode{
 
         elpasedTime = new ElapsedTime();
 
-        Transfer.ranAuto = false;
+        telemetry.update();
     }
 
     @Override
@@ -170,17 +170,19 @@ public class MainTeleOp extends OpMode{
                 if(currGroundHeight > 15) {
                     presetAction = new NullAction();
                 }
-                presetAction = new SequentialAction(
-                        new InstantAction(() -> {
-                            fingers.setPosition(RobotConstants.FINGER_OPEN_POS);
-                            wrist.setPosition(RobotConstants.WRIST_START_POS);
-                            hand.setPosition(handPosFromAngle(Math.PI*290/180, targetTurretAngle));
-                        }),
-                        presetAction,
-                        new InstantAction(() -> {
-                            controlState = ControlState.GRAB;
-                        })
-                );
+                else {
+                    presetAction = new SequentialAction(
+                            new InstantAction(() -> {
+                                fingers.setPosition(RobotConstants.FINGER_OPEN_POS);
+                                wrist.setPosition(RobotConstants.WRIST_START_POS);
+                                hand.setPosition(handPosFromAngle(Math.PI * 290 / 180, targetTurretAngle));
+                            }),
+                            presetAction,
+                            new InstantAction(() -> {
+                                controlState = ControlState.GRAB;
+                            })
+                    );
+                }
             }
 
             controlState = ControlState.PRESET;
