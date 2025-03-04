@@ -30,12 +30,8 @@ import org.firstinspires.ftc.teamcode.utils.Transfer;
 
 import java.util.List;
 
-enum ControlState {
-    GRAB, MANUAL_CONTROL, PRESET
-}
-
 @TeleOp
-public class MainTeleOp extends OpMode{
+public class MainTeleOp2 extends OpMode{
     Drive fod;
     DualTurret turrets; DualSlide slides;
     ControlsToValues slideCtv = new ControlsToValues();
@@ -246,18 +242,18 @@ public class MainTeleOp extends OpMode{
         telemetry.addData("br", motorPowers[3]);
 
         //Servo Controls
-        boolean wristUpPressed = wristUp.activated(gamepad2.dpad_left || (gamepad1.dpad_left && controlState.equals(ControlState.GRAB)));
-        boolean wristDownPressed = wristDown.activated(gamepad2.dpad_right || (gamepad1.dpad_right && controlState.equals(ControlState.GRAB)));
-        if(gamepad2.dpad_left || (gamepad1.dpad_left && controlState.equals(ControlState.GRAB))){
+        boolean wristUpPressed = wristUp.activated(gamepad2.dpad_left);
+        boolean wristDownPressed = wristDown.activated(gamepad2.dpad_right);
+        if(gamepad2.dpad_left){
             double newPos = Math.min(1, wrist.getPosition()+(wristUpPressed ? 0.1 : 0.02));
             wrist.setPosition(newPos);
         }
-        else if(gamepad2.dpad_right || (gamepad1.dpad_right && controlState.equals(ControlState.GRAB))){
+        else if(gamepad2.dpad_right){
             double newPos = Math.max(0, wrist.getPosition()-(wristDownPressed ? 0.1 : 0.02));
             wrist.setPosition(newPos);
         }
 
-        if(g2b.activated(gamepad2.b) || (g1b.activated(gamepad1.b) && controlState.equals(ControlState.GRAB))) {
+        if(g2b.activated(gamepad2.b)) {
             if(Math.abs(fingers.getPosition() - RobotConstants.FINGER_CLOSE_POS) < 0.02){
                 fingers.setPosition(RobotConstants.FINGER_OPEN_POS);
             }
@@ -277,8 +273,8 @@ public class MainTeleOp extends OpMode{
         if(controlState.equals(ControlState.GRAB)) {
             double actualGroundDistance = Math.sin(turrets.getAngleRadians()) * slides.getLength();
             double groundDistanceChange = 0;
-            groundDistanceChange += gamepad1.dpad_up ? 1 : 0;
-            groundDistanceChange -= gamepad1.dpad_down ? 1 : 0;
+            groundDistanceChange += gamepad2.dpad_up ? 1 : 0;
+            groundDistanceChange -= gamepad2.dpad_down ? 1 : 0;
             targetGroundDistance = Math.abs(groundDistanceChange) > 0.01 ? 10000 * Math.signum(groundDistanceChange) :
                     Math.abs(targetGroundDistance-actualGroundDistance) > 0.75 ? actualGroundDistance : targetGroundDistance;
             targetGroundDistance = Math.max(targetGroundDistance, 6.0);
@@ -286,8 +282,8 @@ public class MainTeleOp extends OpMode{
 
             double actualGrabHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turrets.getAngleRadians()) * slides.getLength();
             double grabHeightChange = 0;
-            grabHeightChange += gamepad1.y ? 1 : 0;
-            grabHeightChange -= gamepad1.a ? 1 : 0;
+            grabHeightChange += gamepad2.y ? 1 : 0;
+            grabHeightChange -= gamepad2.a ? 1 : 0;
             clawGrabHeight = Math.abs(grabHeightChange) > 0.01 ? 10000 * Math.signum(grabHeightChange) :
                     Math.abs(clawGrabHeight-actualGrabHeight) > 0.25 ? actualGrabHeight : clawGrabHeight;
             clawGrabHeight = Math.max(clawGrabHeight, RobotConstants.MIN_GRAB_HEIGHT);
@@ -313,7 +309,7 @@ public class MainTeleOp extends OpMode{
         //MANUAL_CONTROL should rarely, if ever, be used in an actual match
         if(controlState.equals(ControlState.MANUAL_CONTROL)){
             targetSlideLength = Math.abs(gamepad2.right_stick_y) > 0.05 ? 10000 * -Math.signum(gamepad2.right_stick_y) :
-                                Math.abs(targetSlideLength-slides.getLength()) > 1 ? slides.getLength() : targetSlideLength;
+                    Math.abs(targetSlideLength-slides.getLength()) > 1 ? slides.getLength() : targetSlideLength;
             targetSlideVelocity = (Math.abs(gamepad2.right_stick_y) > 0.05 ?
                     slideCtv.targetSpeedFromJoysticks(-gamepad2.right_stick_y) : 1) *
                     384.5*435.0/60.0;

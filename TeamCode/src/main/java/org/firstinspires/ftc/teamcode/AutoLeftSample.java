@@ -196,7 +196,6 @@ public class AutoLeftSample extends LinearOpMode {
                         new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI*290/180, findTargetTurretAngle(23.0, AutoTunables.SAMPLE_GRAB_HEIGHT)))),
                         new InstantAction(() -> fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS)),
                         setArmPos(23, AutoTunables.SAMPLE_GRAB_HEIGHT+3, false),
-                        new SleepAction(AutoTunables.WAIT_TIME),
                         setArmPos(23, AutoTunables.SAMPLE_GRAB_HEIGHT, false),
                         new SleepAction(AutoTunables.WAIT_TIME*2),
                         grab(),
@@ -217,7 +216,6 @@ public class AutoLeftSample extends LinearOpMode {
                         new InstantAction(() -> hand.setPosition(handPosFromAngle(Math.PI*290/180, findTargetTurretAngle(23.0, AutoTunables.SAMPLE_GRAB_HEIGHT)))),
                         new InstantAction(() -> fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS)),
                         setArmPos(23, AutoTunables.SAMPLE_GRAB_HEIGHT+3, false),
-                        new SleepAction(AutoTunables.WAIT_TIME),
                         setArmPos(23, AutoTunables.SAMPLE_GRAB_HEIGHT, false),
                         new SleepAction(AutoTunables.WAIT_TIME*2),
                         grab(),
@@ -236,9 +234,7 @@ public class AutoLeftSample extends LinearOpMode {
                                     new InstantAction(() -> fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS))
                                 )
                         ),
-                        new SleepAction(AutoTunables.WAIT_TIME),
                         setArmPos(AutoTunables.SAMPLE_3_EXT_LEN, AutoTunables.SAMPLE_GRAB_HEIGHT+3, false),
-                        new SleepAction(AutoTunables.WAIT_TIME),
                         setArmPos(AutoTunables.SAMPLE_3_EXT_LEN, AutoTunables.SAMPLE_GRAB_HEIGHT, false),
                         new SleepAction(AutoTunables.WAIT_TIME*2),
                         grab(),
