@@ -75,13 +75,13 @@ public class Drive {
         double targetRobotOrientedXMove = Math.sin(targetRobotOrientedMoveHeading) * targetSpeed;
         double targetRobotOrientedYMove = Math.cos(targetRobotOrientedMoveHeading) * targetSpeed;
 
-        double targetRotSpeed = 0;
-        if(Math.abs(rotation) < 0.05){
-            targetRotSpeed = (targetHeading - currRobotHeading);
-        }else{
-            targetHeading = currRobotHeading;
-            targetRotSpeed = ctv.targetSpeedFromJoysticks(rotation)*Math.signum(rotation)*rotSpeed;
-        }
+        double targetRotSpeed = ctv.targetSpeedFromJoysticks(rotation)*Math.signum(rotation)*rotSpeed;
+//        if(Math.abs(rotation) < 0.05){
+//            targetRotSpeed = (targetHeading - currRobotHeading);
+//        }else{
+//            targetHeading = currRobotHeading;
+//            targetRotSpeed = ctv.targetSpeedFromJoysticks(rotation)*Math.signum(rotation)*rotSpeed;
+//        }
 
         double flSpeed = targetRobotOrientedYMove + targetRobotOrientedXMove + targetRotSpeed;
         double frSpeed = targetRobotOrientedYMove - targetRobotOrientedXMove - targetRotSpeed;

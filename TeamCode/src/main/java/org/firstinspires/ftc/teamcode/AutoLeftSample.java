@@ -139,7 +139,7 @@ public class AutoLeftSample extends LinearOpMode {
                 .lineToY(AutoTunables.BASKET_Y)
                 .setTangent(Math.toRadians(0))
                 .lineToX(AutoTunables.BASKET_X)
-                .turnTo(Math.toRadians(45));
+                .turnTo(Math.toRadians(50));
         TrajectoryActionBuilder moveToSamples = toPreloadBasket.endTrajectory().fresh()
                 .turnTo(Math.toRadians(-90))
                 .setTangent(Math.toRadians(0))

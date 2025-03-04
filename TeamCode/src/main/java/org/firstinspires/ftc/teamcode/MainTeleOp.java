@@ -81,7 +81,6 @@ public class MainTeleOp extends OpMode{
         }
         else {
             imu = Transfer.imu;
-            Transfer.imu = null;
             telemetry.addLine("Found transferred imu");
             telemetry.addData("Angle:", -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             telemetry.addLine("PLEASE RUN THE RESET OP MODE IF THIS IS INCORRECT");
@@ -105,13 +104,7 @@ public class MainTeleOp extends OpMode{
         wrist = hardwareMap.get(Servo.class, "wrist");
 
         controlState = ControlState.PRESET;
-        presetAction = new ParallelAction(
-                new InstantAction(() -> {
-                    fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
-                    hand.setPosition(RobotConstants.HAND_START_POS);
-                    wrist.setPosition(RobotConstants.WRIST_START_POS);
-                })
-        );
+        presetAction = new NullAction();
 
         allHubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule module : allHubs) {
@@ -239,9 +232,10 @@ public class MainTeleOp extends OpMode{
 
         //Drive Controls
         double[] motorPowers = new double[10];
-        double xDrive = gamepad1.left_stick_x * (gamepad1.right_trigger > 0.8 ? 0.5 : 1);
-        double yDrive = -gamepad1.left_stick_y * (gamepad1.right_trigger > 0.8 ? 0.5 : 1);
-        double rotation = gamepad1.right_stick_x * (gamepad1.right_trigger > 0.8 ? 0.5 : 1);
+        boolean slow = gamepad1.right_trigger > 0.8 || controlState.equals(ControlState.GRAB);
+        double xDrive = gamepad1.left_stick_x * (slow ? 0.5 : 1);
+        double yDrive = -gamepad1.left_stick_y * (slow ? 0.5 : 1);
+        double rotation = gamepad1.right_stick_x * (slow ? 0.5 : 1);
         motorPowers = fod.driveFieldCentric(xDrive, yDrive, rotation);
         telemetry.addData("xDrive", xDrive);
         telemetry.addData("yDrive", yDrive);
@@ -254,16 +248,16 @@ public class MainTeleOp extends OpMode{
         //Servo Controls
         boolean wristUpPressed = wristUp.activated(gamepad2.dpad_left || (gamepad1.dpad_left && controlState.equals(ControlState.GRAB)));
         boolean wristDownPressed = wristDown.activated(gamepad2.dpad_right || (gamepad1.dpad_right && controlState.equals(ControlState.GRAB)));
-        if(gamepad2.dpad_left || (gamepad1.dpad_left && controlState.equals(ControlState.GRAB))){
+        if(gamepad2.dpad_left || (gamepad1.x && controlState.equals(ControlState.GRAB))){
             double newPos = Math.min(1, wrist.getPosition()+(wristUpPressed ? 0.1 : 0.02));
             wrist.setPosition(newPos);
         }
-        else if(gamepad2.dpad_right || (gamepad1.dpad_right && controlState.equals(ControlState.GRAB))){
+        else if(gamepad2.dpad_right || (gamepad1.b && controlState.equals(ControlState.GRAB))){
             double newPos = Math.max(0, wrist.getPosition()-(wristDownPressed ? 0.1 : 0.02));
             wrist.setPosition(newPos);
         }
 
-        if(g2b.activated(gamepad2.b) || (g1b.activated(gamepad1.b) && controlState.equals(ControlState.GRAB))) {
+        if(g2b.activated(gamepad2.b) || (g1b.activated(gamepad1.a) && controlState.equals(ControlState.GRAB))) {
             if(Math.abs(fingers.getPosition() - RobotConstants.FINGER_CLOSE_POS) < 0.02){
                 fingers.setPosition(RobotConstants.FINGER_OPEN_POS);
             }
@@ -283,19 +277,19 @@ public class MainTeleOp extends OpMode{
         if(controlState.equals(ControlState.GRAB)) {
             double actualGroundDistance = Math.sin(turrets.getAngleRadians()) * slides.getLength();
             double groundDistanceChange = 0;
-            groundDistanceChange += gamepad1.dpad_up ? 1 : 0;
-            groundDistanceChange -= gamepad1.dpad_down ? 1 : 0;
+            groundDistanceChange += gamepad1.dpad_right ? 1 : 0;
+            groundDistanceChange -= gamepad1.dpad_left ? 1 : 0;
             targetGroundDistance = Math.abs(groundDistanceChange) > 0.01 ? 10000 * Math.signum(groundDistanceChange) :
-                    Math.abs(targetGroundDistance-actualGroundDistance) > 0.1 ? actualGroundDistance : targetGroundDistance;
+                    Math.abs(targetGroundDistance-actualGroundDistance) > 0.75 ? actualGroundDistance : targetGroundDistance;
             targetGroundDistance = Math.max(targetGroundDistance, 6.0);
-            targetGroundDistance = Math.min(targetGroundDistance, RobotConstants.MAX_GROUND_DISTANCE);
+            targetGroundDistance = Math.min(targetGroundDistance, RobotConstants.MAX_GROUND_DISTANCE+5);
 
             double actualGrabHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turrets.getAngleRadians()) * slides.getLength();
             double grabHeightChange = 0;
-            grabHeightChange += gamepad1.y ? 1 : 0;
-            grabHeightChange -= gamepad1.a ? 1 : 0;
+            grabHeightChange += gamepad1.dpad_up ? 1 : 0;
+            grabHeightChange -= gamepad1.dpad_down ? 1 : 0;
             clawGrabHeight = Math.abs(grabHeightChange) > 0.01 ? 10000 * Math.signum(grabHeightChange) :
-                    Math.abs(clawGrabHeight-actualGrabHeight) > 0.1 ? actualGrabHeight : clawGrabHeight;
+                    Math.abs(clawGrabHeight-actualGrabHeight) > 0.25 ? actualGrabHeight : clawGrabHeight;
             clawGrabHeight = Math.max(clawGrabHeight, RobotConstants.MIN_GRAB_HEIGHT);
             clawGrabHeight = Math.min(clawGrabHeight, RobotConstants.MAX_GRAB_HEIGHT);
 
