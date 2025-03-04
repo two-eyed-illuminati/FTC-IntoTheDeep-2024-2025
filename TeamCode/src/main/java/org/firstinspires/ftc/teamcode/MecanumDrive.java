@@ -258,7 +258,7 @@ public final class MecanumDrive {
         rightFront.setPower(wheelVels.rightFront.get(0) / maxPowerMag);
     }
 
-    public double maxCorrectionTime = 3.0;
+    public double maxCorrectionTime = 0;
     public double correctionMargin = 0.5;
 
     public final class FollowTrajectoryAction implements Action {
