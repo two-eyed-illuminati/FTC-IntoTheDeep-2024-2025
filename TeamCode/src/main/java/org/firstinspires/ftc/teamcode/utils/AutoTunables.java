@@ -14,7 +14,7 @@ public class AutoTunables {
     public static double SAMPLE_3_EXT_LEN = 25;
     public static double SAMPLE_GRAB_HEIGHT = 8.5;
     public static double SAMPLE_Y = 47;
-    public static double SAMPLE_X = 46;
+    public static double SAMPLE_X = 44.5;
     public static double SPECIMEN_END_HEIGHT = 8.0;
     public static double SPECIMEN_Y = 36.45;
     public static double SPECIMEN_START_HEIGHT = 20.0;

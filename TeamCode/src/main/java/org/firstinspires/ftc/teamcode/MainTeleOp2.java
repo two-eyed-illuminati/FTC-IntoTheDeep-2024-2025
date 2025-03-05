@@ -156,7 +156,7 @@ public class MainTeleOp2 extends OpMode{
             }
             else{
                 double currGroundHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turrets.getAngleRadians()) * slides.getLength();
-                if(currGroundHeight > 15) {
+                if(currGroundHeight > 16) {
                     presetAction = new NullAction();
                 }
                 else {
@@ -188,7 +188,7 @@ public class MainTeleOp2 extends OpMode{
                     new DualTurretAction(turrets).setTargetAngleRadians(targetTurretAngle)
             );
             double currGroundHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turrets.getAngleRadians()) * slides.getLength();
-            if(currGroundHeight > 15){
+            if(currGroundHeight > 16){
                 //Wait for hand servo to come back if we're coming back from a basket
                 presetAction = new SequentialAction(new SleepAction(0.5), presetAction);
             }

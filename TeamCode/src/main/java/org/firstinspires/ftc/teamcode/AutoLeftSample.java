@@ -99,6 +99,23 @@ public class AutoLeftSample extends LinearOpMode {
         );
         return presetAction;
     }
+    public Action defaultPreset(double turretAngle, double slideLen, double handPos){
+        Action presetAction = new ParallelAction(
+                new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, 10.5), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
+                new DualTurretAction(turrets).setTargetAngleRadians(Math.PI * 90 / 180)
+        );
+        double currGroundHeight = RobotConstants.SLIDE_PIVOT_GROUND_HEIGHT - Math.cos(turretAngle) * slideLen;
+        if(currGroundHeight > 15){
+            //Wait for hand servo to come back if we're coming back from a basket
+            presetAction = new SequentialAction(new SleepAction(0.5), presetAction);
+        }
+        presetAction = new ParallelAction(
+                new InstantAction(() -> wrist.setPosition(RobotConstants.WRIST_START_POS)),
+                new InstantAction(() -> hand.setPosition(handPos)),
+                presetAction
+        );
+        return presetAction;
+    }
     @Override
     public void runOpMode() {
         //See meepmeep field map for coordinate system
@@ -167,7 +184,7 @@ public class AutoLeftSample extends LinearOpMode {
         TrajectoryActionBuilder goToSample3FromBasket = moveToBasket2.endTrajectory().fresh()
                 .turnTo(Math.toRadians(-90))
                 .setTangent(Math.toRadians(0))
-                .lineToX(AutoTunables.SAMPLE_X + 12)
+                .lineToX(AutoTunables.SAMPLE_X + 13.5)
                 .turnTo(Math.toRadians(-75));
         TrajectoryActionBuilder moveToBasket3Turn = goToSample3FromBasket.endTrajectory().fresh()
                 .turnTo(Math.toRadians(-90));
@@ -234,7 +251,7 @@ public class AutoLeftSample extends LinearOpMode {
                                     new InstantAction(() -> fingers.setPosition(AutoTunables.GRAB_FINGER_OPEN_POS))
                                 )
                         ),
-                        setArmPos(AutoTunables.SAMPLE_3_EXT_LEN, AutoTunables.SAMPLE_GRAB_HEIGHT+3, false),
+                        setArmPos(AutoTunables.SAMPLE_3_EXT_LEN, AutoTunables.SAMPLE_GRAB_HEIGHT+1.25, false),
                         setArmPos(AutoTunables.SAMPLE_3_EXT_LEN, AutoTunables.SAMPLE_GRAB_HEIGHT, false),
                         new SleepAction(AutoTunables.WAIT_TIME*2),
                         grab(),
@@ -250,7 +267,7 @@ public class AutoLeftSample extends LinearOpMode {
                         release(),
                         new ParallelAction(
                             toSubmersible.build(),
-                            defaultPreset(Math.toRadians(150), 36)
+                            defaultPreset(Math.toRadians(150), 36, RobotConstants.HAND_START_POS)
                         )
                 )
         );
