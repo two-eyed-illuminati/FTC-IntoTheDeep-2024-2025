@@ -58,6 +58,6 @@ public class DualSlide {
         return (slideMotor1.getCurrentPosition() / PULSES_PER_INCH) + COLLAPSED_LENGTH;
     }
 
-    public double getEncoder(){return slideMotor1.getCurrentPosition();
+    public double[] getEncoder(){return new double[]{slideMotor1.getCurrentPosition(), slideMotor2.getCurrentPosition()};
     }
 }

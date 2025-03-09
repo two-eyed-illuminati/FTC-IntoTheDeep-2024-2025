@@ -30,7 +30,8 @@ public class TestDualSlide extends OpMode {
     @Override
     public void loop() {
         slides.setLength(slides.getLength()-gamepad1.left_stick_y*1);
-        telemetry.addData("slide position: ", slides.getEncoder());
+        telemetry.addData("slide position: ", slides.getEncoder()[0]);
+        telemetry.addData("slide2 pos: ", slides.getEncoder()[1]);
         telemetry.update();
     }
 }
