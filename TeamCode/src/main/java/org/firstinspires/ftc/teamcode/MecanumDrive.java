@@ -81,7 +81,7 @@ public final class MecanumDrive {
         // path controller gains
         public double axialGain = 8.0;
         public double lateralGain = 8.0;
-        public double headingGain = 20.0; // shared with turn
+        public double headingGain = 12.0; // shared with turn
 
         public double axialVelGain = 0.0;
         public double lateralVelGain = 0.0;
@@ -138,6 +138,11 @@ public final class MecanumDrive {
             //   leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
             this.pose = pose;
+        }
+
+        @Override
+        public int[] encoderPositions(){
+            return new int[]{};
         }
 
         @Override

@@ -123,6 +123,8 @@ public class MainTeleOp2 extends OpMode{
         telemetry.addData("MODE: ", controlState.name());
         telemetry.addData("Turret Angle: ", turrets.getAngleDegrees());
         telemetry.addData("Slide Length: ", slides.getLength());
+        telemetry.addData("Slide1: ", slides.getEncoder()[0]);
+        telemetry.addData("Slide2: ", slides.getEncoder()[1]);
         telemetry.addData("Hand Pos: ", hand.getPosition());
         telemetry.addData("Wrist Pos: ", wrist.getPosition());
         telemetry.addData("Fingers Pos: ", fingers.getPosition());
@@ -212,13 +214,12 @@ public class MainTeleOp2 extends OpMode{
         }
         if(gamepad2.left_trigger > 0.8 && gamepad2.right_trigger > 0.8 && gamepad2.left_bumper && gamepad2.right_bumper){
             controlState = ControlState.PRESET;
-            presetAction = new ParallelAction(
-                    new DualSlideSetLengthWithLimit(new DualSlideSetLength(slides, 10), turrets, RobotConstants.MAX_PRESET_GROUND_DISTANCE),
-                    new DualTurretAction(turrets).setTargetAngleRadians(Math.PI*115/180)
-            );
-            fingers.setPosition(RobotConstants.FINGER_CLOSE_POS);
-            wrist.setPosition(RobotConstants.WRIST_START_POS);
-            hand.setPosition(RobotConstants.HAND_START_POS);
+            slides.slideMotor1.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            slides.slideMotor1.setTargetPosition(0);
+            slides.slideMotor1.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            slides.slideMotor2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            slides.slideMotor2.setTargetPosition(0);
+            slides.slideMotor2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         }
 
         //Should rarely, if ever, be used in an actual match

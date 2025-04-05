@@ -63,6 +63,10 @@ public final class TwoDeadWheelLocalizer implements Localizer {
 
         pose = initialPose;
     }
+    @Override
+    public int[] encoderPositions(){
+        return new int[]{};
+    }
 
     @Override
     public void setPose(Pose2d pose) {

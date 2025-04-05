@@ -63,6 +63,10 @@ public final class ThreeDeadWheelLocalizer implements Localizer {
     public Pose2d getPose() {
         return pose;
     }
+    @Override
+    public int[] encoderPositions() {
+        return new int[] {par0.getPositionAndVelocity().position, par1.getPositionAndVelocity().position, perp.getPositionAndVelocity().position};
+    }
 
     @Override
     public PoseVelocity2d update() {
